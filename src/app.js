@@ -1,5 +1,6 @@
-const express = require('express');
+const express = require("express");
 const app = express();
+const recipesController = require("./controllers/RecipesController");
 const path = require('path');
 const userRouter = require("./controllers/user-routes.js");
 const { logger } = require("./util/logger.js"); 
@@ -13,6 +14,7 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use("/recipes", recipesController);
 app.use("/users", userRouter);
 
 app.listen(PORT, () => {
