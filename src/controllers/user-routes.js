@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const profileService= require("../service/profileService");
+const profileService= require("../service/user-service");
 
 router.patch("/profile", async(req, res) => {
     const data = profileService.createProfile(req.body);

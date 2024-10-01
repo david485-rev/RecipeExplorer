@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-const router = require("../src/controllers/profileRouter");
+const router = require("./controllers/user-routes.js");
 const logger = require("../src/util/logger");
 const PORT = 3000;
 

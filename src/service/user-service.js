@@ -1,4 +1,4 @@
-const profileService = require('../repository/profileDAO')
+const profileService = require('../repository/user-dao')
 
 async function createProfile(item) {
     let data = await profileService.patchProfile({
