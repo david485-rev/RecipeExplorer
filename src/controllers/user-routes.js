@@ -2,12 +2,13 @@ const express = require("express");
 const { logger } = require('../util/logger.js');
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const { getUserByUsernamePassword } = require('../service/user-service.js');
+const { getUserByUsernamePassword, register } = require('../service/user-service.js');
 require('dotenv').config();
 const secretKey = process.env.JWT_SECRET;
 
 router.post("/login", async (req, res) => {
-    //logger.info("");
+    // logger.info(req.body.username);
+    // logger.info(req.body.password);
     let token = null;
     if(req.body){
         if (req.body.username && req.body.password) {

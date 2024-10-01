@@ -1,12 +1,12 @@
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");
-const logger = require("../util/logger");
+const { logger } = require("../util/logger");
 const uuid = require("uuid");
 
 const client = new DynamoDBClient({ region: "us-west-1" });
 const docClient = DynamoDBDocumentClient.from(client);
 
-const TableName = "Recipes";
+const TableName = "RecipeExplorer";
 let recipeId = uuid.v4();
 
 async function insertRecipe(recipe) {
@@ -14,7 +14,7 @@ async function insertRecipe(recipe) {
     TableName,
     Item: {
       ...recipe,
-      recipeId: recipeId
+      uuid: recipeId
     }
   });
   try {
