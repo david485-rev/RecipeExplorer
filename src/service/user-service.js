@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const { v4: uuidv4 } = require('uuid');
 
 const User = require('../model/user');
-const { createUser, queryUserByUsername, profileService } = require('../repository/user-dao');
+const { createUser, queryUserByUsername, patchProfile } = require('../repository/user-dao');
 
 const saltRound = 10;
 
@@ -54,7 +54,7 @@ async function getUserByUsernamePassword(username, password){
 }
 
 async function createProfile(item) {
-    let data = await profileService.patchProfile({
+    let data = await patchProfile({
        ...item,  
     });
     return data;
