@@ -39,7 +39,7 @@ async function queryUserByUsername(username) {
         IndexName: 'username-creation_date-index',
         KeyConditionExpression: '#username = :u',
         ExpressionAttributeNames: { '#username': 'username' },
-        ExpressionAttributeValues: { ':u': { S: username } }
+        ExpressionAttributeValues: { ':u': username }
     });
 
     try {
