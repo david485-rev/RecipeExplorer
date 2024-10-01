@@ -1,4 +1,4 @@
-const { insertRecipe } = require("../dao/recipesDAO");
+const { insertRecipe } = require("../repository/recipe-dao");
 
 async function createRecipe(recipe) {
   const newRecipe = await insertRecipe(recipe);

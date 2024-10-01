@@ -30,7 +30,7 @@ router.post("/login", async (req, res) => {
         res.status(400).json({message: "no account found"});
     }
 })
-router.post(async function(req, res, next) {
+router.post('/register', async function(req, res, next) {
         try {
             await register(req.body);
 

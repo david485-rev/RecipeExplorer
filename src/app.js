@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const recipesController = require("./controllers/RecipesController");
+const recipesController = require("./controllers/recipe-routes.js");
 const path = require('path');
 const userRouter = require("./controllers/user-routes.js");
 const { logger } = require("./util/logger.js"); 
