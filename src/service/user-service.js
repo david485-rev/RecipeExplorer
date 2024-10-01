@@ -36,21 +36,27 @@ async function register(reqBody) {
 }
 
 async function getUserByUsernamePassword(username, password){
-    if(username && password){
+    if(!username){
+        throw new Error('missing username');
+    }
+    if(!password){
+        throw new Error('missing password');
+    }
+    try{
         const user = await queryUserByUsername(username);
-        if(user){
+        if (await bcrypt.compare(password, user.password)) {
+            return { uuid: user.user_id, username: user.username };
+        }
             // logger.info(`user ${user.uuid} found`);
             // logger.info("" + await bcrypt.hash(password, saltRound))
             // if(await bcrypt.compare(password, user.password)){
 
             //     return {user_id: user.user_id, username: user.username};
             // }
-            if(password == user.password) {
-                return user;
-            }
-        }
+    }catch(err){
+        logger.error(err);
+        throw new Error(err);
     }
-    return null;
 }
 module.exports = {
     register,
