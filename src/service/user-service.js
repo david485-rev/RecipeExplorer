@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 const User = require('../model/user');
 const { createUser, queryUserByUsername } = require('../repository/user-dao');
 
-const saltRound = 10;
+const saltRounds = 10;
 
 async function register(reqBody) {
     const { username, password } = reqBody;
@@ -23,8 +23,10 @@ async function register(reqBody) {
     if(user) {
         throw new Error('user with username already exists!');
     }
+
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
     
-    const newUser = new User(username, password);
+    const newUser = new User(username, hashedPassword);
 
     try {
         const data = await createUser(newUser);
