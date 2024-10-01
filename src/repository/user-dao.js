@@ -58,9 +58,9 @@ async function queryUserByUsername(username) {
 
 async function patchProfile(item) {
     const command = new UpdateCommand({
-        TableName: "Profile_table",
+        TableName: "RecipeExplorer",
         Key: {
-            'userID':item.userID
+            'uuid':item.uuid
           },
           UpdateExpression: 'Set #email = :email, #userName = :userName, #picture = :picture, #description = :description',
           ExpressionAttributeNames: {
