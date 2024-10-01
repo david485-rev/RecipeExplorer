@@ -1,11 +1,10 @@
 const express = require("express");
 const { logger } = require('../util/logger.js');
-const { getSecretKey } = require('../constants.js');
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const { getUserByUsernamePassword } = require('../service/user-service.js');
-
-const secretKey = getSecretKey();
+require('dotenv').config();
+const secretKey = process.env.JWT_SECRET;
 
 router.post("/login", async (req, res) => {
     //logger.info("");
