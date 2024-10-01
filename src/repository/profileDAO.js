@@ -20,24 +20,23 @@ async function patchProfile(item) {
         Key: {
             'userID':item.userID
           },
-          UpdateExpression: 'Set #email = :email, #userName = :userName #picture = :picture #description =:description',
+          UpdateExpression: 'Set #email = :email, #userName = :userName, #picture = :picture, #description = :description',
           ExpressionAttributeNames: {
             '#email': 'email',
             '#userName': 'userName',
             '#picture': 'picture',
             '#description': 'description'
           },
-          ExpressionAtrributeValues: marshall({
+          ExpressionAttributeValues: {
             ':email': item.email,
             ':userName': item.userName,
             ':picture': item.picture,
             ':description': item.description
-          }),
+          },
           ReturnValues: "ALL_NEW"
     });
     try{
-        const data = await documentClient.send(command);
-        logger.info(`patch command to database complete ${JSON.stringify(data)}`);
+        const data = await documentClient.send(command);    
         return data;
     }catch(err){
         console.error(err);
