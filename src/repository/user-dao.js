@@ -1,10 +1,10 @@
-const { DynamoDBClient, QueryCommand } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const {
     DynamoDBDocumentClient,
     PutCommand,
     UpdateCommand,
+    QueryCommand
 } = require('@aws-sdk/lib-dynamodb');
-const { unmarshall } = require('@aws-sdk/util-dynamodb');
 
 const { logger } = require('../util/logger');
 
@@ -49,7 +49,7 @@ async function queryUserByUsername(username) {
             return false; 
         }
 
-        return unmarshall(data.Items[0]);
+        return data.Items[0];
     } catch(err) {
         logger.error(err);
         throw new Error(err);

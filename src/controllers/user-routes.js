@@ -1,12 +1,36 @@
-const express = require('express');
+const express = require("express");
+const { logger } = require('../util/logger.js');
+const { getSecretKey } = require('../constants.js');
 const router = express.Router();
+const jwt = require("jsonwebtoken");
+const { getUserByUsernamePassword } = require('../service/user-service.js');
 
-const { logger } = require('../util/logger');
+const secretKey = getSecretKey();
 
-const { register } = require('../service/user-service');
-
-router.route('/register')
-    .post(async function(req, res, next) {
+router.post("/login", async (req, res) => {
+    //logger.info("");
+    let token = null;
+    if(req.body){
+        if (req.body.username && req.body.password) {
+            const account = await getUserByUsernamePassword(req.body.username, req.body.password);
+            if(account){
+                token = jwt.sign({
+                    uuid:account.uuid,
+                    username: account.username
+                }, secretKey, {
+                    expiresIn: "7d"
+                });
+            } 
+        }
+    }
+    if(token){
+        return res.status(200).json({token});
+    }
+    else{
+        res.status(400).json({message: "no account found"});
+    }
+})
+router.post(async function(req, res, next) {
         try {
             await register(req.body);
 
