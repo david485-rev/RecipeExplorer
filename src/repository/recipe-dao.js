@@ -1,21 +1,42 @@
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");
+const {
+  DynamoDBDocumentClient,
+  PutCommand,
+  QueryCommand
+} = require("@aws-sdk/lib-dynamodb");
 const { logger } = require("../util/logger");
-const uuid = require("uuid");
 
 const client = new DynamoDBClient({ region: "us-west-1" });
 const docClient = DynamoDBDocumentClient.from(client);
 
 const TableName = "RecipeExplorer";
-let recipeId = uuid.v4();
 
-async function insertRecipe(recipe) {
+async function queryRecipes() {
+  const command = new QueryCommand({
+    TableName,
+    IndexName: "type-creation_date-index",
+    KeyConditionExpression: "#type = :type",
+    ExpressionAttributeNames: {
+      "#type": "type"
+    },
+    ExpressionAttributeValues: {
+      ":type": "recipe"
+    }
+  });
+  try {
+    const response = await docClient.send(command);
+    console.log(response);
+    logger.info("Queried recipes");
+    return response;
+  } catch (err) {
+    logger.error(err);
+  }
+}
+
+async function insertRecipe(Recipe) {
   const command = new PutCommand({
     TableName,
-    Item: {
-      ...recipe,
-      uuid: recipeId
-    }
+    Item: Recipe
   });
   try {
     const response = await docClient.send(command);
@@ -26,4 +47,4 @@ async function insertRecipe(recipe) {
   }
 }
 
-module.exports = { insertRecipe };
+module.exports = { queryRecipes, insertRecipe };
