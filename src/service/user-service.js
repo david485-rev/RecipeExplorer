@@ -45,14 +45,14 @@ async function getUserByUsernamePassword(username, password){
     try{
         const user = await queryUserByUsername(username);
         if (await bcrypt.compare(password, user.password)) {
-            return { uuid: user.user_id, username: user.username };
+            return { uuid: user.uuid, username: user.username };
         }
-            // logger.info(`user ${user.uuid} found`);
-            // logger.info("" + await bcrypt.hash(password, saltRound))
-            // if(await bcrypt.compare(password, user.password)){
+        //logger.info(`user ${user.uuid} found`);
+        // logger.info("" + await bcrypt.hash(password, saltRound))
+        // if(await bcrypt.compare(password, user.password)){
 
-            //     return {user_id: user.user_id, username: user.username};
-            // }
+        //     return {user_id: user.user_id, username: user.username};
+            
     }catch(err){
         logger.error(err);
         throw new Error(err);
