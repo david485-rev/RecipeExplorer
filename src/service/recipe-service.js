@@ -1,8 +1,15 @@
-const { insertRecipe } = require("../repository/recipe-dao");
+const { queryRecipes, insertRecipe } = require("../repository/recipe-dao");
+const Recipe = require("../model/recipe");
 
-async function createRecipe(recipe) {
-  const newRecipe = await insertRecipe(recipe);
-  return newRecipe;
+async function createRecipe(recipeData) {
+  const newRecipe = new Recipe(recipeData);
+  const recipe = await insertRecipe(newRecipe);
+  return recipe;
 }
 
-module.exports = { createRecipe };
+async function getRecipes() {
+  const recipes = await queryRecipes();
+  return recipes;
+}
+
+module.exports = { getRecipes, createRecipe };
