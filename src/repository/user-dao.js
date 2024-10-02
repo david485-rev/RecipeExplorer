@@ -56,22 +56,43 @@ async function queryUserByUsername(username) {
     }
 }
 
-async function patchProfile(item) {
+
+async function quaryByUuid(uuid) {
+    const command = new QueryCommand({
+        TableName,
+        KeyConditionExpression: '#uuid = :uuid',
+        ExpressionAttributeNames: { '#uuid': 'uuid' },
+        ExpressionAttributeValues: {':uuid': uuid }
+    });
+
+    try {
+        const data = await documentClient.send(command);
+        return data;
+
+    } catch(err) {
+        logger.error(err);
+        throw new Error(err);
+    }
+} 
+
+
+// update profile
+async function patchProfile(item, uuid) {
     const command = new UpdateCommand({
         TableName: "RecipeExplorer",
         Key: {
-            'uuid':item.uuid
+            'uuid':uuid
           },
-          UpdateExpression: 'Set #email = :email, #userName = :userName, #picture = :picture, #description = :description',
+          UpdateExpression: 'Set #email = :email, #username = :username, #picture = :picture, #description = :description',
           ExpressionAttributeNames: {
             '#email': 'email',
-            '#userName': 'userName',
+            '#username': 'username',
             '#picture': 'picture',
             '#description': 'description'
           },
           ExpressionAttributeValues: {
             ':email': item.email,
-            ':userName': item.userName,
+            ':username': item.username,
             ':picture': item.picture,
             ':description': item.description
           },
@@ -82,6 +103,7 @@ async function patchProfile(item) {
         return data;
     }catch(err){
         console.error(err);
+        throw new Error(err);
     }
 
 }
@@ -89,5 +111,6 @@ async function patchProfile(item) {
 module.exports = {
     createUser,
     queryUserByUsername,
-    patchProfile
+    patchProfile,
+    quaryByUuid
 }
