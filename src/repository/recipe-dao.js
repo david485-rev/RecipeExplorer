@@ -25,7 +25,6 @@ async function queryRecipes() {
   });
   try {
     const response = await docClient.send(command);
-    console.log(response);
     logger.info("Queried recipes");
     return response;
   } catch (err) {
