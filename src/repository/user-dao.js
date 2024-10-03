@@ -67,7 +67,7 @@ async function quaryByUuid(uuid) {
 
     try {
         const data = await documentClient.send(command);
-        return data;
+        return data.Items[0];
 
     } catch(err) {
         logger.error(err);
@@ -77,12 +77,13 @@ async function quaryByUuid(uuid) {
 
 
 // update profile
-async function patchProfile(item, uuid) {
+async function patchProfile(item, uuid, creation_date) {
     const command = new UpdateCommand({
         TableName: "RecipeExplorer",
-        Key: {
-            'uuid':uuid
-          },
+        Key: { 
+            'uuid' :uuid,
+            'creation_date':creation_date
+        },
           UpdateExpression: 'Set #email = :email, #username = :username, #picture = :picture, #description = :description',
           ExpressionAttributeNames: {
             '#email': 'email',
@@ -90,7 +91,7 @@ async function patchProfile(item, uuid) {
             '#picture': 'picture',
             '#description': 'description'
           },
-          ExpressionAttributeValues: {
+          ExpressionAttributeValues: { 
             ':email': item.email,
             ':username': item.username,
             ':picture': item.picture,
