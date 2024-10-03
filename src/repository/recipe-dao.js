@@ -5,8 +5,9 @@ const {
   QueryCommand
 } = require("@aws-sdk/lib-dynamodb");
 const { logger } = require("../util/logger");
-
-const client = new DynamoDBClient({ region: "us-west-1" });
+require('dotenv').config();
+const region = process.env.AWS_REGION;;
+const client = new DynamoDBClient({ region: region });
 const docClient = DynamoDBDocumentClient.from(client);
 
 const TableName = "RecipeExplorer";

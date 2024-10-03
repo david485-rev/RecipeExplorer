@@ -2,9 +2,10 @@ const { logger } = require('../util/logger');
 const bcrypt = require("bcrypt");
 const { v4: uuidv4 } = require('uuid');
 const jwt = require("jsonwebtoken");
+require('dotenv').config();
 const secretKey = process.env.JWT_SECRET;
 const User = require('../model/user');
-const { createUser, queryUserByUsername, patchProfile, quaryByUuid } = require('../repository/user-dao');
+const { createUser, queryUserByUsername, postProfile, queryByUuid } = require('../repository/user-dao');
 
 const saltRounds = 10;
 
@@ -64,7 +65,7 @@ async function getUserByUsernamePassword(username, password){
 
 async function getInfoProfile(item) {
    try{
-    let data = quaryByUuid(item);
+    let data = queryByUuid(item);
      return data;
    }catch(err){
     logger.error(err);
@@ -74,7 +75,7 @@ async function getInfoProfile(item) {
 
 async function createProfile(item, uuid, creation_date) {
     try{
-        let data = await patchProfile({
+        let data = await postProfile({
         ...item
         },
         uuid,

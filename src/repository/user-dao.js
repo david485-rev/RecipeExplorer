@@ -7,8 +7,9 @@ const {
 } = require('@aws-sdk/lib-dynamodb');
 
 const { logger } = require('../util/logger');
-
-const client = new DynamoDBClient({region: 'us-east-2'});
+require('dotenv').config();
+const region = process.env.AWS_REGION;
+const client = new DynamoDBClient({region: region});
 const documentClient = DynamoDBDocumentClient.from(client);
 
 const TableName = 'RecipeExplorer';
@@ -57,7 +58,7 @@ async function queryUserByUsername(username) {
 }
 
 
-async function quaryByUuid(uuid) {
+async function queryByUuid(uuid) {
     const command = new QueryCommand({
         TableName,
         KeyConditionExpression: '#uuid = :uuid',
@@ -77,7 +78,7 @@ async function quaryByUuid(uuid) {
 
 
 // update profile
-async function patchProfile(item, uuid, creation_date) {
+async function postProfile(item, uuid, creation_date) {
     const command = new UpdateCommand({
         TableName: "RecipeExplorer",
         Key: { 
@@ -112,6 +113,6 @@ async function patchProfile(item, uuid, creation_date) {
 module.exports = {
     createUser,
     queryUserByUsername,
-    patchProfile,
-    quaryByUuid
+    postProfile,
+    queryByUuid
 }
