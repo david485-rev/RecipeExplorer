@@ -8,7 +8,7 @@ const {
 
 const { logger } = require('../util/logger');
 
-const client = new DynamoDBClient({region: 'us-west-1'});
+const client = new DynamoDBClient({region: 'us-east-2'});
 const documentClient = DynamoDBDocumentClient.from(client);
 
 const TableName = 'RecipeExplorer';
@@ -56,7 +56,62 @@ async function queryUserByUsername(username) {
     }
 }
 
+
+async function quaryByUuid(uuid) {
+    const command = new QueryCommand({
+        TableName,
+        KeyConditionExpression: '#uuid = :uuid',
+        ExpressionAttributeNames: { '#uuid': 'uuid' },
+        ExpressionAttributeValues: {':uuid': uuid }
+    });
+
+    try {
+        const data = await documentClient.send(command);
+        return data.Items[0];
+
+    } catch(err) {
+        logger.error(err);
+        throw new Error(err);
+    }
+} 
+
+
+// update profile
+async function patchProfile(item, uuid, creation_date) {
+    const command = new UpdateCommand({
+        TableName: "RecipeExplorer",
+        Key: { 
+            'uuid' :uuid,
+            'creation_date':creation_date
+        },
+          UpdateExpression: 'Set #email = :email, #username = :username, #picture = :picture, #description = :description',
+          ExpressionAttributeNames: {
+            '#email': 'email',
+            '#username': 'username',
+            '#picture': 'picture',
+            '#description': 'description'
+          },
+          ExpressionAttributeValues: { 
+            ':email': item.email,
+            ':username': item.username,
+            ':picture': item.picture,
+            ':description': item.description
+          },
+          ReturnValues: "ALL_NEW"
+    });
+    try{
+        const data = await documentClient.send(command);    
+        return data;
+    }catch(err){
+        console.error(err);
+        throw new Error(err);
+    }
+
+}
+
 module.exports = {
     createUser,
     queryUserByUsername,
+    patchProfile,
+    quaryByUuid
 }
