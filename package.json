@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "node ./src/app.js"
   },
   "keywords": [],
@@ -19,5 +19,8 @@
     "jsonwebtoken": "^9.0.2",
     "uuid": "^10.0.0",
     "winston": "^3.14.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }
