@@ -49,7 +49,7 @@ async function getUserByUsernamePassword(username, password){
     try{
         const user = await queryUserByUsername(username);
         if (await bcrypt.compare(password, user.password)) {
-            return { uuid: user.uuid, username: user.username };
+            return { uuid: user.uuid, username: user.username, creation_date: user.creation_date};
         }
         //logger.info(`user ${user.uuid} found`);
         // logger.info("" + await bcrypt.hash(password, saltRound))

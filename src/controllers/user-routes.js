@@ -7,14 +7,13 @@ require('dotenv').config();
 const secretKey = process.env.JWT_SECRET;;
 
 router.post("/login", async (req, res) => {
-    console.log(secretKey);
     try{
         let token = null;
         const account = await getUserByUsernamePassword(req.body.username, req.body.password);
-        
         token = jwt.sign({
             uuid: account.uuid,
-            username: account.username
+            username: account.username,
+            creation_date: account.creation_date
         }, secretKey, {
             expiresIn: "7d"
         });
@@ -41,15 +40,8 @@ router.post('/register', async function(req, res, next) {
     })
 
 
-router.get("/profile", async(req, res)=> {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
-
-    if (!token){
-        res.status(401).json({message: "Unauthorized Access"});
-    } else{
-        const user = await decodeJWT(token);
-        req.user = user;
+router.get("/profile", authenticateToken, async(req, res)=> {
+        const user = req.user;
         try{
             const data = await getInfoProfile(user.uuid);
             res.status(200).json(data);
@@ -57,30 +49,32 @@ router.get("/profile", async(req, res)=> {
             logger.error(err.message);
             res.status(400).json({message: err.message});
         }
-    }
-})
+    });
 
-router.post("/profile", async(req, res) => {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
-    
-    if (!token){
-        res.status(401).json({message: "Unauthorized Access"});
-    } else{
-        const user = await decodeJWT(token);
-        req.user = user;
-        const userInfo = await getInfoProfile(user.uuid);
+router.post("/profile", authenticateToken, async(req, res) => {
+        const user = req.user;
         try{
-            const data = await createProfile(req.body, user.uuid, userInfo.creation_date);
+            const data = await createProfile(req.body, user.uuid, user.creation_date);
             res.status(201).json({message: 'Successfully updated'});
         } catch(err) {
             logger.error(err.message);
             res.status(400).json({message: err.message});
             
         }  
+    }) 
+
+async function authenticateToken(req, res, next){
+
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+
+    if (!token){
+        res.status(401).json({message: "Unauthorized Access"});
+    }else{
+        const user = await decodeJWT(token);
+        req.user = user;
+        next();
     }
-
-}) 
-
+}
 
 module.exports = router;
