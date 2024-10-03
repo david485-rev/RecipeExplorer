@@ -1,9 +1,10 @@
 const { logger } = require('../util/logger');
 const bcrypt = require("bcrypt");
 const { v4: uuidv4 } = require('uuid');
-
+const jwt = require("jsonwebtoken");
+const secretKey = process.env.JWT_SECRET;
 const User = require('../model/user');
-const { createUser, queryUserByUsername } = require('../repository/user-dao');
+const { createUser, queryUserByUsername, patchProfile, quaryByUuid } = require('../repository/user-dao');
 
 const saltRounds = 10;
 
@@ -60,7 +61,45 @@ async function getUserByUsernamePassword(username, password){
         throw new Error(err);
     }
 }
+
+async function getInfoProfile(item) {
+   try{
+    let data = quaryByUuid(item);
+     return data;
+   }catch(err){
+    logger.error(err);
+    throw new Error(err); 
+   }  
+}
+
+async function createProfile(item, uuid, creation_date) {
+    try{
+        let data = await patchProfile({
+        ...item
+        },
+        uuid,
+        creation_date
+        );
+        return data;
+    }catch(err){
+        logger.error(err);
+        throw new Error(err);
+    }
+}
+
+async function decodeJWT(token){
+    try{
+        const user = await jwt.verify(token, secretKey)
+        return user;
+    }catch(err){
+        console.error(err);
+    }
+}
+
 module.exports = {
     register,
-    getUserByUsernamePassword
+    getUserByUsernamePassword,
+    createProfile,
+    getInfoProfile,
+    decodeJWT
 }

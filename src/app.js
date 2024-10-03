@@ -1,7 +1,9 @@
 const express = require("express");
 const app = express();
+
 const recipeRouter = require("./controllers/recipe-routes.js");
 const path = require("path");
+
 const userRouter = require("./controllers/user-routes.js");
 const { logger } = require("./util/logger.js");
 
@@ -20,3 +22,4 @@ app.use("/users", userRouter);
 app.listen(PORT, () => {
   console.log(`Server is listening on http://localhost:${PORT}`);
 });
+
