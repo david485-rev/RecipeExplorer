@@ -1,11 +1,14 @@
+const uuid = require('uuid');
+
 class Comment {
-    constructor(userUuid, recipeUuid, description, rating) {
+    constructor(authorUuid, recipeUuid, description, rating) {
         this.uuid = uuid.v4();
         this.creation_date = Math.floor(new Date().getTime() / 1000);
-        this.userUuid = userUuid;
+        this.authorUuid = authorUuid;
         this.recipeUuid = recipeUuid;
         this.description = description;
         this.rating = rating;
+        this.type = "comment"
     }
 }
 

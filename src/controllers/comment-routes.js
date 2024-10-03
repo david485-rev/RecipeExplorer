@@ -7,13 +7,13 @@ router.post("/", async (req, res) => {
     try {
         await postComment(req.body);
         res.status(201).json({ message: 'Comment successfully created' });
+        return;
     }
     catch (err) {
         logger.error(err);
         res.status(400).json({ message: err.message });
         return;
     }
-
 })
 router.get("/:commentUuid", async (req, res) => {
     try{
@@ -27,6 +27,7 @@ router.get("/:commentUuid", async (req, res) => {
     }catch(err){
         logger.error(err);
         res.status(404).json({message: "no comment found"})
+        return;
     }
 })
 
