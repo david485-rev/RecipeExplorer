@@ -2,7 +2,7 @@ const { logger } = require('../util/logger');
 const bcrypt = require("bcrypt");
 const { v4: uuidv4 } = require('uuid');
 const jwt = require("jsonwebtoken");
-const secretKey = "recipetastyyum";
+const secretKey = process.env.JWT_SECRET;
 const User = require('../model/user');
 const { createUser, queryUserByUsername, patchProfile, quaryByUuid } = require('../repository/user-dao');
 

@@ -4,8 +4,7 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const { getUserByUsernamePassword, register, createProfile, getInfoProfile, decodeJWT} = require('../service/user-service.js');
 require('dotenv').config();
-const secretKey = "recipetastyyum";
-//process.env.JWT_SECRET;
+const secretKey = process.env.JWT_SECRET;;
 
 router.post("/login", async (req, res) => {
     console.log(secretKey);
