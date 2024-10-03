@@ -5,11 +5,12 @@ const {
     UpdateCommand,
     QueryCommand
 } = require('@aws-sdk/lib-dynamodb');
+require('dotenv').config();
+const AWS_REGION = process.env.AWS_REGION;
 
 const { logger } = require('../util/logger');
-require('dotenv').config();
-const region = process.env.AWS_REGION;
-const client = new DynamoDBClient({region: region});
+
+const client = new DynamoDBClient({region: AWS_REGION});
 const documentClient = DynamoDBDocumentClient.from(client);
 
 const TableName = 'RecipeExplorer';
