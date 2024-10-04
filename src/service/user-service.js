@@ -75,12 +75,15 @@ async function getInfoProfile(item) {
 
 async function passwordChange(item, uuid, creation_date) {
     const user = await queryByUuid(uuid);
+    if(!item.newPassword) {
+        throw new error("New password can not be empty")
+    }
     try{
         if(await bcrypt.compare(item.password, user.password)){
             let cryptPassword = await bcrypt.hash(item.newPassword, saltRounds);
             let data = patchPassword(cryptPassword, uuid, creation_date);
             return data; 
-        }
+        } else throw new error("password is not correct")
     }catch(err){
         logger.error(err);
         throw new Error(err);

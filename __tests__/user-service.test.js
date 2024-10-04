@@ -72,4 +72,6 @@ describe('User Service Tests', () => {
         }).rejects.toThrow('user with username already exists!');
         expect(queryUserByUsername).toHaveBeenCalledTimes(1);
     });
+
+
 });
