@@ -4,7 +4,7 @@ const {
   PutCommand,
   QueryCommand
 } = require("@aws-sdk/lib-dynamodb");
-require('dotenv').config();
+require("dotenv").config();
 const AWS_REGION = process.env.AWS_REGION;
 const { logger } = require("../util/logger");
 
