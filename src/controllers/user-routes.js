@@ -1,8 +1,9 @@
 const express = require("express");
-const { logger } = require('../util/logger.js');
+const { logger} = require('../util/logger.js');
+const { authenticateToken} = require('../util/authentication.js')
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const { getUserByUsernamePassword, register, createProfile, getInfoProfile, decodeJWT} = require('../service/user-service.js');
+const { getUserByUsernamePassword, register, createProfile, getInfoProfile} = require('../service/user-service.js');
 require('dotenv').config();
 const secretKey = process.env.JWT_SECRET;;
 
@@ -63,18 +64,5 @@ router.post("/profile", authenticateToken, async(req, res) => {
         }  
     }) 
 
-async function authenticateToken(req, res, next){
-
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
-
-    if (!token){
-        res.status(401).json({message: "Unauthorized Access"});
-    }else{
-        const user = await decodeJWT(token);
-        req.user = user;
-        next();
-    }
-}
 
 module.exports = router;

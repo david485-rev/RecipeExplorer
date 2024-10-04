@@ -88,19 +88,10 @@ async function createProfile(item, uuid, creation_date) {
     }
 }
 
-async function decodeJWT(token){
-    try{
-        const user = await jwt.verify(token, secretKey)
-        return user;
-    }catch(err){
-        console.error(err);
-    }
-}
 
 module.exports = {
     register,
     getUserByUsernamePassword,
     createProfile,
-    getInfoProfile,
-    decodeJWT
+    getInfoProfile
 }
