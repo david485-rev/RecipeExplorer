@@ -12,7 +12,6 @@ class Recipe {
     this.description = recipeData.description;
     this.ingredients = recipeData.ingredients;
     this.instructions = recipeData.instructions;
-    this.comments = recipeData.comments;
   }
 }
 
