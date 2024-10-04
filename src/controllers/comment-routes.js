@@ -20,12 +20,12 @@ router.post("/", async (req, res) => {
 router.get("/recipe", async (req, res) => {
     try{
         const recipeUuid = req.query.recipe;
-        const comment = getRecipeComments(recipeUuid);
+        const comment = await getRecipeComments(recipeUuid);
         res.status(200).json(comment);
         return;
     }catch(err){
         logger.error(err);
-        res.status(404).json({message: err})
+        res.status(404).json({message: err.message})
         return;
     }
 })
@@ -33,7 +33,7 @@ router.put("/:uuid", async (req, res) => {
     try{
         //author uuid is hardcoded in until jwt can be brought in
         const authorUuid = "0634d64b-b395-4079-9294-d15440c14182";
-        const comment = editComment(req.params.uuid,authorUuid, req.body);
+        const comment = await editComment(req.params.uuid, authorUuid, req.body);
         if(comment){
             res.status(200).json(comment);
             return;
@@ -42,10 +42,10 @@ router.put("/:uuid", async (req, res) => {
     }catch(err){
         logger.error(err);
         if (err === "Forbidden Access"){
-            res.status(403).json({ message: err });
+            res.status(403).json({ message: err.message });
             return;
         }
-        res.status(404).json({message: err});
+        res.status(404).json({ message: err.message });
         return;
     }
 })

@@ -18,7 +18,7 @@ async function postComment(authorUuid, reqBody) {
     if (!rating) {
         throw new Error('missing rating');
     }
-    const newComment = new Comment(userUuid, recipeUuid, description, rating);
+    const newComment = new Comment(authorUuid, recipeUuid, description, rating);
 
     try {
         const data = await createComment(newComment);
@@ -58,16 +58,24 @@ async function editComment(uuid, authorUuid, reqBody){
         if(oldComment.authorUuid !== authorUuid){
             throw new Error("Forbidden Access");
         }
+        let changes = false;
         let newDescription = oldComment.description;
         if (description != null && newDescription !== description){
             newDescription = description;
+            changes = true;
         }
         let newRating = oldComment.rating;
         if (rating != null && newRating !== rating){
             newRating = rating;
+            changes = true;
         }
-        const newComment = await updateComment(uuid, oldComment.creation_date, newDescription, newRating);
-        return newComment;
+        if(changes){
+            const newComment = await updateComment(uuid, oldComment.creation_date, newDescription, newRating);
+            return newComment;
+        }
+        else{
+            throw new Error("no changes have been made")
+        }
     }catch(err){
         logger.error(err);
         throw new Error(err);
