@@ -5,7 +5,9 @@ const { postComment, getRecipeComments, editComment } = require('../service/comm
 
 router.post("/", async (req, res) => {
     try {
-        await postComment(req.body);
+        //author uuid is hardcoded in until jwt can be brought in
+        const authorUuid = "0634d64b-b395-4079-9294-d15440c14182";
+        await postComment(authorUuid, req.body);
         res.status(201).json({ message: 'Comment successfully created' });
         return;
     }
@@ -29,7 +31,9 @@ router.get("/recipe", async (req, res) => {
 })
 router.put("/:uuid", async (req, res) => {
     try{
-        const comment = editComment(req.params.uuid, req.body);
+        //author uuid is hardcoded in until jwt can be brought in
+        const authorUuid = "0634d64b-b395-4079-9294-d15440c14182";
+        const comment = editComment(req.params.uuid,authorUuid, req.body);
         if(comment){
             res.status(200).json(comment);
             return;
