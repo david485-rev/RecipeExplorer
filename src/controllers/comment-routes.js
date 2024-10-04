@@ -1,7 +1,7 @@
 const express = require("express");
 const { logger } = require('../util/logger.js');
 const router = express.Router();
-const { postComment, getCommentByUuid } = require('../service/comment-service.js');
+const { postComment, getRecipeComments, editComment } = require('../service/comment-service.js');
 
 router.post("/", async (req, res) => {
     try {
@@ -15,18 +15,33 @@ router.post("/", async (req, res) => {
         return;
     }
 })
-router.get("/:commentUuid", async (req, res) => {
+router.get("/recipe", async (req, res) => {
     try{
-        const comment = getCommentByUuid(req.params.commentUuid);
+        const recipeUuid = req.query.recipe;
+        const comment = getRecipeComments(recipeUuid);
+        res.status(200).json(comment);
+        return;
+    }catch(err){
+        logger.error(err);
+        res.status(404).json({message: err})
+        return;
+    }
+})
+router.put("/:uuid", async (req, res) => {
+    try{
+        const comment = editComment(req.params.uuid, req.body);
         if(comment){
             res.status(200).json(comment);
             return;
         }
-        res.status(404).json({ message: "no comment found" });
-        return;
+        res.status(400).json({message: "error updating comment"});
     }catch(err){
         logger.error(err);
-        res.status(404).json({message: "no comment found"})
+        if (err === "Forbidden Access"){
+            res.status(403).json({ message: err });
+            return;
+        }
+        res.status(404).json({message: err});
         return;
     }
 })
