@@ -73,7 +73,6 @@ async function updateComment(uuid, creation_date, description, rating) {
 }
 
 module.exports = {
-    queryCommentByUuid,
     createComment,
     scanCommentsByRecipeUuid,
     updateComment
