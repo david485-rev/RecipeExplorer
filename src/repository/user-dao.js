@@ -77,6 +77,30 @@ async function queryByUuid(uuid) {
     }
 } 
 
+// update password
+async function patchPassword(item, uuid, creation_date) {
+    const command = new UpdateCommand({
+        TableName: "RecipeExplorer",
+        Key: { 
+            'uuid' :uuid,
+            'creation_date':creation_date
+        },
+          UpdateExpression:'Set #password = :password',
+          ExpressionAttributeNames: {
+            '#password': 'password'
+          },
+          ExpressionAttributeValues: {
+            ':password': item
+          },
+    });
+    try{
+        const data = await documentClient.send(command);
+        return data;
+    }catch(err) {
+        console.error(err);
+        throw new Error(err);
+    }
+} 
 
 // update profile
 async function postProfile(item, uuid, creation_date) {
@@ -115,5 +139,6 @@ module.exports = {
     createUser,
     queryUserByUsername,
     postProfile,
-    queryByUuid
+    queryByUuid,
+    patchPassword
 }
