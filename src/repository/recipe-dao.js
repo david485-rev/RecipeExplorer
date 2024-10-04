@@ -79,7 +79,6 @@ async function updateRecipe(Recipe) {
   });
   try {
     const response = await docClient.send(command);
-    console.log(response);
     logger.info(`Updated recipe: ${response}`);
     return response;
   } catch (err) {
