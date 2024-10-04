@@ -1,6 +1,5 @@
 const express = require("express");
-const { logger} = require('../util/logger.js');
-const { authenticateToken} = require('../util/authentication.js')
+const { logger } = require('../util/logger.js');
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const { getUserByUsernamePassword, register, createProfile, passwordChange} = require('../service/user-service.js');
