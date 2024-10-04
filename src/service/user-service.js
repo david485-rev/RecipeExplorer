@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 require('dotenv').config();
 const secretKey = process.env.JWT_SECRET;
 const User = require('../model/user');
-const { createUser, queryUserByUsername, postProfile, queryByUuid } = require('../repository/user-dao');
+const { createUser, queryUserByUsername, postProfile, queryByUuid, patchPassword} = require('../repository/user-dao');
 
 const saltRounds = 10;
 
@@ -73,6 +73,20 @@ async function getInfoProfile(item) {
    }  
 }
 
+async function passwordChange(item, uuid, creation_date) {
+    const user = await queryByUuid(uuid);
+    try{
+        if(await bcrypt.compare(item.password, user.password)){
+            let cryptPassword = await bcrypt.hash(item.newPassword, saltRounds);
+            let data = patchPassword(cryptPassword, uuid, creation_date);
+            return data; 
+        }
+    }catch(err){
+        logger.error(err);
+        throw new Error(err);
+    }
+}
+
 async function createProfile(item, uuid, creation_date) {
     try{
         let data = await postProfile({
@@ -88,18 +102,10 @@ async function createProfile(item, uuid, creation_date) {
     }
 }
 
-async function decodeJWT(token){
-    try{
-        const user = await jwt.verify(token, secretKey)
-        return user;
-    }catch(err){
-        console.error(err);
-    }
-}
-
 module.exports = {
     register,
     getUserByUsernamePassword,
     createProfile,
-    getInfoProfile
+    getInfoProfile,
+    passwordChange
 }
