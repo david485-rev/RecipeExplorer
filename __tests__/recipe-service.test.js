@@ -1,7 +1,15 @@
 const { logger } = require("../src/util/logger");
 const uuid = require("uuid");
-const { getRecipes, createRecipe } = require("../src/service/recipe-service");
-const { queryRecipes, insertRecipe } = require("../src/repository/recipe-dao");
+const {
+  getRecipes,
+  createRecipe,
+  editRecipe
+} = require("../src/service/recipe-service");
+const {
+  queryRecipes,
+  insertRecipe,
+  updateRecipe
+} = require("../src/repository/recipe-dao");
 const Recipe = require("../src/model/recipe");
 
 jest.mock("../src/repository/recipe-dao");
@@ -42,7 +50,7 @@ describe("Recipe Service", () => {
       const recipeData = {
         recipe_thumb: "image_url",
         recipe_name: "New Recipe",
-        type: "dessert",
+        type: "recipe",
         category: "sweets",
         cuisine: "French",
         description: "Delicious dessert recipe",
@@ -79,7 +87,7 @@ describe("Recipe Service", () => {
       const invalidData = {
         recipe_thumb: "image_url",
         recipe_name: undefined,
-        type: "dessert",
+        type: "recipe",
         category: "sweets",
         cuisine: "French",
         description: "Delicious dessert recipe",
@@ -96,7 +104,7 @@ describe("Recipe Service", () => {
       const recipeData = {
         recipe_thumb: "image_url",
         recipe_name: "New Recipe",
-        type: "dessert",
+        type: "recipe",
         category: "sweets",
         cuisine: "French",
         description: "Delicious dessert recipe",
@@ -110,6 +118,38 @@ describe("Recipe Service", () => {
 
       await expect(createRecipe(recipeData)).rejects.toThrow("Insertion error");
       expect(logger.error).toHaveBeenCalledWith(mockError);
+    });
+  });
+
+  describe("editRecipe", () => {
+    it("should update an existing recipe and return the updated recipe", async () => {
+      const recipeData = {
+        uuid: "12345",
+        creation_date: 1234567,
+        recipe_thumb: "image_url",
+        recipe_name: "Updated Dessert Name",
+        type: "recipe",
+        category: "sweets",
+        cuisine: "Italian",
+        description: "Delicious updated dessert recipe.",
+        ingredients: ["sugar", "flower", "mascarpone", "butter"],
+        instructions: "Mix ingredients and bake."
+      };
+
+      const mockUpdatedRecipe = {
+        $metadata: { httpStatusCode: 200 },
+        Attributes: {
+          ...recipeData
+        }
+      };
+
+      updateRecipe.mockResolvedValue(mockUpdatedRecipe);
+
+      const result = await editRecipe(recipeData);
+
+      expect(result.status).toBe(200);
+      expect(result.body).toEqual(mockUpdatedRecipe.Attributes);
+      expect(updateRecipe).toHaveBeenCalledWith(recipeData);
     });
   });
 });
