@@ -168,9 +168,9 @@ describe("Recipe Service", () => {
 
       const mockError = new Error("Update error");
 
-      insertRecipe.mockRejectedValue(mockError);
+      updateRecipe.mockRejectedValue(mockError);
 
-      await expect(createRecipe(recipeData)).rejects.toThrow("Update error");
+      await expect(editRecipe(recipeData)).rejects.toThrow("Update error");
       expect(logger.error).toHaveBeenCalledWith(mockError);
     });
   });
