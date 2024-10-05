@@ -151,5 +151,27 @@ describe("Recipe Service", () => {
       expect(result.body).toEqual(mockUpdatedRecipe.Attributes);
       expect(updateRecipe).toHaveBeenCalledWith(recipeData);
     });
+
+    it("should log and throw an error if updateRecipe fails", async () => {
+      const recipeData = {
+        uuid: "12345",
+        creation_date: 1234567,
+        recipe_thumb: "image_url",
+        recipe_name: "Updated Dessert Name",
+        type: "recipe",
+        category: "sweets",
+        cuisine: "Italian",
+        description: "Delicious updated dessert recipe.",
+        ingredients: ["sugar", "flower", "mascarpone", "butter"],
+        instructions: "Mix ingredients and bake."
+      };
+
+      const mockError = new Error("Update error");
+
+      insertRecipe.mockRejectedValue(mockError);
+
+      await expect(createRecipe(recipeData)).rejects.toThrow("Update error");
+      expect(logger.error).toHaveBeenCalledWith(mockError);
+    });
   });
 });
