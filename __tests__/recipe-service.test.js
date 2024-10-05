@@ -40,15 +40,14 @@ describe("Recipe Service", () => {
   describe("createRecipe", () => {
     it("should create a recipe successfully", async () => {
       const recipeData = {
-        thumb: "image_url",
-        recipeName: "New Recipe",
+        recipe_thumb: "image_url",
+        recipe_name: "New Recipe",
         type: "dessert",
         category: "sweets",
         cuisine: "French",
         description: "Delicious dessert recipe",
         ingredients: ["sugar", "flour"],
-        instructions: "Mix and bake.",
-        comments: []
+        instructions: "Mix and bake."
       };
 
       const newRecipe = new Recipe(recipeData);
@@ -57,15 +56,14 @@ describe("Recipe Service", () => {
         $metadata: { httpStatusCode: 201 },
         uuid: "test-uuid",
         creation_date: newRecipe.creation_date,
-        recipe_thumb: recipeData.thumb,
-        recipe_name: recipeData.recipeName,
+        recipe_thumb: recipeData.recipe_thumb,
+        recipe_name: recipeData.recipe_name,
         type: recipeData.type,
         category: recipeData.category,
         cuisine: recipeData.cuisine,
         description: recipeData.description,
         ingredients: recipeData.ingredients,
-        instructions: recipeData.instructions,
-        comments: recipeData.comments
+        instructions: recipeData.instructions
       };
 
       insertRecipe.mockResolvedValue(mockResponse);
@@ -79,15 +77,14 @@ describe("Recipe Service", () => {
 
     it("should throw an error if recipe data is invalid", async () => {
       const invalidData = {
-        thumb: "image_url",
-        recipeName: undefined,
+        recipe_thumb: "image_url",
+        recipe_name: undefined,
         type: "dessert",
         category: "sweets",
         cuisine: "French",
         description: "Delicious dessert recipe",
         ingredients: ["sugar", "flour"],
-        instructions: "Mix and bake.",
-        comments: []
+        instructions: "Mix and bake."
       };
 
       await expect(createRecipe(invalidData)).rejects.toThrow(
@@ -97,15 +94,14 @@ describe("Recipe Service", () => {
 
     it("should log and throw an error if insertRecipe fails", async () => {
       const recipeData = {
-        thumb: "image_url",
-        recipeName: "New Recipe",
+        recipe_thumb: "image_url",
+        recipe_name: "New Recipe",
         type: "dessert",
         category: "sweets",
         cuisine: "French",
         description: "Delicious dessert recipe",
         ingredients: ["sugar", "flour"],
-        instructions: "Mix and bake.",
-        comments: []
+        instructions: "Mix and bake."
       };
 
       const mockError = new Error("Insertion error");
