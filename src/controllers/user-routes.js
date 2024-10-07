@@ -14,8 +14,7 @@ router.post("/login", async (req, res) => {
         const account = await getUserByUsernamePassword(req.body.username, req.body.password);
         token = jwt.sign({
             uuid: account.uuid,
-            username: account.username,
-            creation_date: account.creation_date
+            username: account.username
         }, secretKey, {
             expiresIn: "7d"
         });
