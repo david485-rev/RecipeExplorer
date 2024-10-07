@@ -10,7 +10,7 @@ const AWS_REGION = process.env.AWS_REGION;
 
 const { logger } = require('../util/logger');
 
-const client = new DynamoDBClient({region: AWS_REGION});
+const client = new DynamoDBClient({ region: AWS_REGION });
 const documentClient = DynamoDBDocumentClient.from(client);
 
 const TableName = 'RecipeExplorer';
@@ -18,13 +18,13 @@ const TableName = 'RecipeExplorer';
 async function createUser(User) {
     const command = new PutCommand({
         TableName,
-        Item : User
+        Item: User
     });
 
     try {
         const data = await documentClient.send(command);
         return data;
-    } catch(err) {
+    } catch (err) {
         logger.error(err);
         throw new Error(err)
     }
@@ -47,76 +47,107 @@ async function queryUserByUsername(username) {
     try {
         const data = await documentClient.send(command);
 
-        if(data.Items.length === 0) {
-            return false; 
+        if (data.Items.length === 0) {
+            return false;
         }
 
         return data.Items[0];
-    } catch(err) {
+    } catch (err) {
         logger.error(err);
         throw new Error(err);
     }
-} 
+}
 
 // update password
 async function patchPassword(item, uuid) {
     const command = new UpdateCommand({
         TableName: "RecipeExplorer",
-        Key: { 
-            'uuid' :uuid,
+        Key: {
+            'uuid': uuid,
         },
-          UpdateExpression:'Set #password = :password',
-          ExpressionAttributeNames: {
+        UpdateExpression: 'Set #password = :password',
+        ExpressionAttributeNames: {
             '#password': 'password'
-          },
-          ExpressionAttributeValues: {
+        },
+        ExpressionAttributeValues: {
             ':password': item
-          },
+        },
     });
-    try{
+    try {
         const data = await documentClient.send(command);
         return data;
-    }catch(err) {
+    } catch (err) {
         console.error(err);
         throw new Error(err);
     }
-} 
+}
 
 // update profile
 async function postProfile(item, uuid) {
     const command = new UpdateCommand({
         TableName: "RecipeExplorer",
-        Key: { 
-            'uuid' :uuid,
+        Key: {
+            'uuid': uuid,
         },
-          UpdateExpression: 'Set #email = :email, #username = :username, #picture = :picture, #description = :description',
-          ExpressionAttributeNames: {
+        UpdateExpression: 'Set #email = :email, #username = :username, #picture = :picture, #description = :description',
+        ExpressionAttributeNames: {
             '#email': 'email',
             '#username': 'username',
             '#picture': 'picture',
             '#description': 'description'
-          },
-          ExpressionAttributeValues: { 
+        },
+        ExpressionAttributeValues: {
             ':email': item.email,
             ':username': item.username,
             ':picture': item.picture,
             ':description': item.description
-          },
-          ReturnValues: "ALL_NEW"
+        },
+        ReturnValues: "ALL_NEW"
     });
-    try{
-        const data = await documentClient.send(command);    
+    try {
+        const data = await documentClient.send(command);
         return data;
-    }catch(err){
+    } catch (err) {
         console.error(err);
         throw new Error(err);
     }
 
 }
 
+// change name
+// make sure they cant login
+async function deleteUser(uuid) {
+    const command = new UpdateCommand({
+        TableName,
+        Key: { "uuid": uuid },
+        UpdateExpression: "set #username = :u, #password = :pa, #email = :e, #description = :d, #picture = :pi",
+        ExpressionAttributeNames: {
+            "#username": "username",
+            "#password": "password",
+            "#email": "email",
+            "#description": "description",
+            "#picture": "picture"
+        },
+        ExpressionAttributeValues: {
+            ":u": `deleted-user${uuid}`,
+            ":pa": null,
+            ":e": null,
+            ":d": null,
+            ":pi": null
+        },
+    });
+
+    try {
+        const data = await documentClient.send(command);
+    } catch(err) {
+        throw new Error(err);
+    }
+}
+
 module.exports = {
     createUser,
     queryUserByUsername,
     postProfile,
-    patchPassword
+    patchPassword,
+    deleteUser
 }

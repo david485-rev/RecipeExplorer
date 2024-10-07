@@ -3,7 +3,7 @@ const { logger } = require('../util/logger.js');
 const { authenticateToken } = require('../util/authentication.js')
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const { getUserByUsernamePassword, register, createProfile, passwordChange } = require('../service/user-service.js');
+const { getUserByUsernamePassword, register, createProfile, passwordChange, removeUser } = require('../service/user-service.js');
 const { getDatabaseItem } = require('../service/general-service.js');
 require('dotenv').config();
 const secretKey = process.env.JWT_SECRET;;
@@ -75,5 +75,17 @@ router.patch("/password", authenticateToken, async (req, res) => {
     }
 })
 
+router.delete("/:uuid", async function(req, res, next) {
+    try {
+        const data = await removeUser(req.params);
+
+        res.status(200).json({ message: 'User sucessfully deleted' });
+        return;
+    } catch(err) {
+        logger.error(err.message);
+        res.status(400).json({ message: err.message});
+        return;
+    }
+});
 
 module.exports = router;
