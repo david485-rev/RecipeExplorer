@@ -22,7 +22,7 @@ async function postComment(authorUuid, reqBody) {
 
     try {
         const data = await createComment(newComment);
-        return data.$metadata;
+        return data;
     } catch (err) {
         logger.error(err);
         throw new Error(err);
