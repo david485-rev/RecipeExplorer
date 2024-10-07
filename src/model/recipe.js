@@ -6,7 +6,7 @@ class Recipe {
     this.creation_date = Math.floor(new Date().getTime() / 1000);
     this.recipe_thumb = recipeData.recipe_thumb;
     this.recipe_name = recipeData.recipe_name;
-    this.type = recipeData.type;
+    this.type = "recipe";
     this.category = recipeData.category;
     this.cuisine = recipeData.cuisine;
     this.description = recipeData.description;
