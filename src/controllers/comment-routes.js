@@ -2,6 +2,8 @@ const express = require("express");
 const { logger } = require('../util/logger.js');
 const router = express.Router();
 const { postComment, getRecipeComments, editComment } = require('../service/comment-service.js');
+const { authenticateToken } = require('../util/authentication.js')
+
 
 router.post("/", authenticateToken, async (req, res) => {
     try {

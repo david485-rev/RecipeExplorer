@@ -31,6 +31,7 @@ async function createComment(comment) {
 
 async function scanCommentsByRecipeUuid(recipeUuid){
     const command = new ScanCommand({
+        TableName,
         FilterExpression: "#r = :r",
         ExpressionAttributeNames: { "#r": "recipeUuid" },
         ExpressionAttributeValues: { ":r": recipeUuid }
@@ -44,7 +45,7 @@ async function scanCommentsByRecipeUuid(recipeUuid){
     }
 }
 
-async function updateComment(uuid, creation_date, description, rating) {
+async function updateComment(uuid, description, rating) {
     const command = new UpdateCommand({
         TableName,
         Key: {
