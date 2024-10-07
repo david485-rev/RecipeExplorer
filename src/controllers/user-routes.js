@@ -45,7 +45,7 @@ router.get("/profile", authenticateToken, async (req, res) => {
     const user = req.user;
     try {
         const data = await getDatabaseItem(user.uuid);
-        res.status(200).json({username: data.username, email: data.email, description: data.description, picture: data.picture});
+        res.status(200).json(data);
     } catch (err) {
         logger.error(err.message);
         res.status(400).json({ message: err.message });
