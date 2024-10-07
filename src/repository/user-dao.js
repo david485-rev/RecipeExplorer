@@ -59,11 +59,11 @@ async function queryUserByUsername(username) {
 }
 
 // update password
-async function patchPassword(item, uuid, creation_date) {
+async function patchPassword(item, uuid) {
     const command = new UpdateCommand({
         TableName: "RecipeExplorer",
         Key: {
-            'uuid': uuid,
+            'uuid': uuid
         },
         UpdateExpression: 'Set #password = :password',
         ExpressionAttributeNames: {
@@ -83,11 +83,11 @@ async function patchPassword(item, uuid, creation_date) {
 }
 
 // update profile
-async function postProfile(item, uuid, creation_date) {
+async function postProfile(item, uuid) {
     const command = new UpdateCommand({
         TableName: "RecipeExplorer",
         Key: {
-            'uuid': uuid,
+            'uuid': uuid
         },
         UpdateExpression: 'Set #email = :email, #username = :username, #picture = :picture, #description = :description',
         ExpressionAttributeNames: {
