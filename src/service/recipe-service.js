@@ -2,7 +2,8 @@ const { logger } = require("../util/logger");
 const {
   queryRecipes,
   insertRecipe,
-  updateRecipe
+  updateRecipe,
+  deleteRecipe
 } = require("../repository/recipe-dao");
 const Recipe = require("../model/recipe");
 
@@ -56,4 +57,15 @@ function dataValidation(data) {
   }
 }
 
-module.exports = { getRecipes, createRecipe, editRecipe };
+async function removeRecipe(recipeId) {
+  try {
+    const recipe = await deleteRecipe(recipeId);
+    response.status = recipe.$metadata.httpStatusCode;
+    response.body = recipe;
+    return response;
+  } catch (err) {
+    logger.error(err);
+    throw new Error(err);
+  }
+}
+module.exports = { getRecipes, createRecipe, editRecipe, removeRecipe };
