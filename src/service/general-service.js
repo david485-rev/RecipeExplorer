@@ -2,7 +2,7 @@ const { logger } = require('../util/logger');
 
 const { getItemByUuid } = require('../repository/general-dao.js');
 
-async function getItemByUuid(uuid){
+async function getDatabaseItem(uuid){
     if(!uuid){
         throw new Error('missing Uuid');
     }
