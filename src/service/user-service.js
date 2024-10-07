@@ -63,16 +63,6 @@ async function getUserByUsernamePassword(username, password){
     }
 }
 
-async function getInfoProfile(item) {
-   try{
-    let data = getDatabaseItem(item);
-     return data;
-   }catch(err){
-    logger.error(err);
-    throw new Error(err); 
-   }  
-}
-
 async function passwordChange(item, uuid) {
     const user = await getItemByUuid(uuid);
     if(!item.newPassword) {
