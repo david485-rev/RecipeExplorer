@@ -1,14 +1,19 @@
 const { logger } = require('../util/logger');
 
 const Comment = require('../model/comment.js');
-const { createComment, queryCommentByUuid } = require('../repository/comment-dao.js');
+const { createComment, 
+    scanCommentsByRecipeUuid,
+    updateComment
+} = require('../repository/comment-dao.js');
+const { getItemByUuid } = require('../repository/general-dao.js')
 
-async function postComment(reqBody) {
+async function postComment(authorUuid, reqBody) {
     const { rating, description, recipeUuid } = reqBody;
-    //this is where jwt should have uuid 
-    const userUuid = "0634d64b-b395-4079-9294-d15440c14182";
     if(!recipeUuid){
-        throw new Error('missing recipe uuid')
+        throw new Error('missing recipe uuid');
+    }
+    if (!authorUuid) {
+        throw new Error('missing author uuid');
     }
     if (!description) {
         throw new Error('missing description');
@@ -16,10 +21,20 @@ async function postComment(reqBody) {
     if (!rating) {
         throw new Error('missing rating');
     }
-    const newComment = new Comment(userUuid, recipeUuid, description, rating);
+    /* Depreciated
+    const recipe = await getItemByUuid(recipeUuid);
+     
+    if(recipe.type !== 'recipe'){
+        throw new Error('comment being attached to non-recipe entity');
+    }
+    */
+    const newComment = new Comment(authorUuid, recipeUuid, description, rating);
 
     try {
         const data = await createComment(newComment);
+        if(data.$metadata.httpStatusCode !== 200){
+            throw new Error("database error");
+        }
         return data;
     } catch (err) {
         logger.error(err);
@@ -27,14 +42,54 @@ async function postComment(reqBody) {
     }
 }
 
-async function getCommentByUuid(uuid) {
-    if (!uuid) {
-        throw new Error('missing uuid');
+async function getRecipeComments(recipeUuid){
+    if (!recipeUuid){
+        throw new Error('missing recipe uuid');
     }
-    try {
-        const comment = await queryCommentByUuid(uuid);
-        return comment;
-    } catch (err) {
+    try{
+        const commentList = await scanCommentsByRecipeUuid(recipeUuid);
+        return commentList;
+    }catch(err){
+        logger.error(err);
+        throw new Error(err);
+    }
+}
+
+async function editComment(uuid, authorUuid, reqBody){
+    if(!uuid){
+        throw new Error("missing uuid");
+    }
+    if(!authorUuid){
+        throw new Error("missing authorUuid");
+    }
+    try{
+        const { description, rating } = reqBody;
+        const oldComment = await getItemByUuid(uuid);
+        if(oldComment.type !== "comment"){
+            throw new Error("uuid does not point to comment");
+        }
+        if(oldComment.authorUuid !== authorUuid){
+            throw new Error("Forbidden Access");
+        }
+        let changes = false;
+        let newDescription = oldComment.description;
+        if (description != null && newDescription !== description){
+            newDescription = description;
+            changes = true;
+        }
+        let newRating = oldComment.rating;
+        if (rating != null && newRating !== rating){
+            newRating = rating;
+            changes = true;
+        }
+        if(changes){
+            const newComment = await updateComment(uuid, oldComment.creation_date, newDescription, newRating);
+            return newComment;
+        }
+        else{
+            throw new Error("no changes have been made")
+        }
+    }catch(err){
         logger.error(err);
         throw new Error(err);
     }
@@ -42,5 +97,6 @@ async function getCommentByUuid(uuid) {
 
 module.exports = {
     postComment,
-    getCommentByUuid
+    getRecipeComments,
+    editComment
 }

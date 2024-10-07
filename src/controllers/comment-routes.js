@@ -1,11 +1,14 @@
 const express = require("express");
 const { logger } = require('../util/logger.js');
 const router = express.Router();
-const { postComment, getCommentByUuid } = require('../service/comment-service.js');
+const { postComment, getRecipeComments, editComment } = require('../service/comment-service.js');
+const { authenticateToken } = require('../util/authentication.js')
 
-router.post("/", async (req, res) => {
+
+router.post("/", authenticateToken, async (req, res) => {
     try {
-        await postComment(req.body);
+        //author uuid is hardcoded in until jwt can be brought in
+        await postComment(req.user.uuid, req.body);
         res.status(201).json({ message: 'Comment successfully created' });
         return;
     }
@@ -15,18 +18,34 @@ router.post("/", async (req, res) => {
         return;
     }
 })
-router.get("/:commentUuid", async (req, res) => {
+router.get("/recipe", async (req, res) => {
     try{
-        const comment = getCommentByUuid(req.params.commentUuid);
+        const recipeUuid = req.query.recipe;
+        const comment = await getRecipeComments(recipeUuid);
+        res.status(200).json(comment);
+        return;
+    }catch(err){
+        logger.error(err);
+        res.status(404).json({message: err.message})
+        return;
+    }
+})
+router.put("/:uuid", authenticateToken, async (req, res) => {
+    try{
+        //author uuid is hardcoded in until jwt can be brought in
+        const comment = await editComment(req.params.uuid, req.user.uuid, req.body);
         if(comment){
             res.status(200).json(comment);
             return;
         }
-        res.status(404).json({ message: "no comment found" });
-        return;
+        res.status(400).json({message: "error updating comment"});
     }catch(err){
         logger.error(err);
-        res.status(404).json({message: "no comment found"})
+        if (err === "Forbidden Access"){
+            res.status(403).json({ message: err.message });
+            return;
+        }
+        res.status(404).json({ message: err.message });
         return;
     }
 })

@@ -114,7 +114,6 @@ module.exports = {
     register,
     getUserByUsernamePassword,
     createProfile,
-    getInfoProfile,
     passwordChange,
     removeUser
 }

@@ -63,7 +63,7 @@ async function patchPassword(item, uuid) {
     const command = new UpdateCommand({
         TableName: "RecipeExplorer",
         Key: {
-            'uuid': uuid,
+            'uuid': uuid
         },
         UpdateExpression: 'Set #password = :password',
         ExpressionAttributeNames: {
@@ -87,7 +87,7 @@ async function postProfile(item, uuid) {
     const command = new UpdateCommand({
         TableName: "RecipeExplorer",
         Key: {
-            'uuid': uuid,
+            'uuid': uuid
         },
         UpdateExpression: 'Set #email = :email, #username = :username, #picture = :picture, #description = :description',
         ExpressionAttributeNames: {
