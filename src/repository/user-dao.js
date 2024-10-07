@@ -38,7 +38,7 @@ async function createUser(User) {
 async function queryUserByUsername(username) {
     const command = new QueryCommand({
         TableName,
-        IndexName: 'username-creation_date-index',
+        IndexName: 'username-index',
         KeyConditionExpression: '#username = :u',
         ExpressionAttributeNames: { '#username': 'username' },
         ExpressionAttributeValues: { ':u': username }
