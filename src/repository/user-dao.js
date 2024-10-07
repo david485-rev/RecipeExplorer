@@ -56,25 +56,6 @@ async function queryUserByUsername(username) {
         logger.error(err);
         throw new Error(err);
     }
-}
-
-
-async function queryByUuid(uuid) {
-    const command = new QueryCommand({
-        TableName,
-        KeyConditionExpression: '#uuid = :uuid',
-        ExpressionAttributeNames: { '#uuid': 'uuid' },
-        ExpressionAttributeValues: {':uuid': uuid }
-    });
-
-    try {
-        const data = await documentClient.send(command);
-        return data.Items[0];
-
-    } catch(err) {
-        logger.error(err);
-        throw new Error(err);
-    }
 } 
 
 // update password
@@ -108,7 +89,6 @@ async function postProfile(item, uuid, creation_date) {
         TableName: "RecipeExplorer",
         Key: { 
             'uuid' :uuid,
-            'creation_date':creation_date
         },
           UpdateExpression: 'Set #email = :email, #username = :username, #picture = :picture, #description = :description',
           ExpressionAttributeNames: {
