@@ -3,11 +3,10 @@ const { logger } = require('../util/logger.js');
 const router = express.Router();
 const { postComment, getRecipeComments, editComment } = require('../service/comment-service.js');
 
-router.post("/", async (req, res) => {
+router.post("/", authenticateToken, async (req, res) => {
     try {
         //author uuid is hardcoded in until jwt can be brought in
-        const authorUuid = "0634d64b-b395-4079-9294-d15440c14182";
-        await postComment(authorUuid, req.body);
+        await postComment(req.user.uuid, req.body);
         res.status(201).json({ message: 'Comment successfully created' });
         return;
     }
@@ -29,11 +28,10 @@ router.get("/recipe", async (req, res) => {
         return;
     }
 })
-router.put("/:uuid", async (req, res) => {
+router.put("/:uuid", authenticateToken, async (req, res) => {
     try{
         //author uuid is hardcoded in until jwt can be brought in
-        const authorUuid = "0634d64b-b395-4079-9294-d15440c14182";
-        const comment = await editComment(req.params.uuid, authorUuid, req.body);
+        const comment = await editComment(req.params.uuid, req.user.uuid, req.body);
         if(comment){
             res.status(200).json(comment);
             return;
