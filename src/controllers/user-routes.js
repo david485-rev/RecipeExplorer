@@ -7,7 +7,6 @@ require('dotenv').config();
 const secretKey = process.env.JWT_SECRET;;
 
 router.post("/login", async (req, res) => {
-    console.log(secretKey);
     try{
         let token = null;
         const account = await getUserByUsernamePassword(req.body.username, req.body.password);

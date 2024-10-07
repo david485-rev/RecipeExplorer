@@ -10,7 +10,7 @@ const { createUser, queryUserByUsername, patchProfile, queryByUuid } = require('
 const saltRounds = 10;
 
 async function register(reqBody) {
-    const { username, password } = reqBody;
+    const { username, password, description } = reqBody;
 
     if(!username) {
         throw new Error('missing username');
@@ -28,7 +28,7 @@ async function register(reqBody) {
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     
-    const newUser = new User(username, hashedPassword);
+    const newUser = new User(username, hashedPassword, description);
 
     try {
         const data = await createUser(newUser);
@@ -51,11 +51,6 @@ async function getUserByUsernamePassword(username, password){
         if (await bcrypt.compare(password, user.password)) {
             return { uuid: user.uuid, username: user.username };
         }
-        //logger.info(`user ${user.uuid} found`);
-        // logger.info("" + await bcrypt.hash(password, saltRound))
-        // if(await bcrypt.compare(password, user.password)){
-
-        //     return {user_id: user.user_id, username: user.username};
             
     }catch(err){
         logger.error(err);
