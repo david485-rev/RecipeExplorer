@@ -26,7 +26,7 @@ router.put("/", async (req, res) => {
 });
 
 router.delete("/:uuid", async (req, res) => {
-  const response = await removeRecipe(req.param.uuid);
+  const response = await removeRecipe(req.params.uuid);
   res.status(response.status);
   res.send(response.body);
 });
