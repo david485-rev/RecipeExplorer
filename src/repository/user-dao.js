@@ -118,6 +118,5 @@ module.exports = {
     createUser,
     queryUserByUsername,
     postProfile,
-    queryByUuid,
     patchPassword
 }

@@ -3,7 +3,7 @@ const app = express();
 const recipeRouter = require("./controllers/recipe-routes.js");
 const userRouter = require("./controllers/user-routes.js");
 const commentRouter = require("./controllers/comment-routes.js");
-const generalService = require("./service/general-service.js");
+const { getDatabaseItem } = require("./service/general-service.js");
 const { logger } = require("./util/logger.js"); 
 
 
@@ -22,7 +22,7 @@ app.use("/comments", commentRouter)
 app.get("/:uuid", async (req, res) => {
     try{
         const uuid = req.params.uuid;
-        const item = await generalService.getItemByUuid(uuid);
+      const item = await getDatabaseItem(uuid);
         res.status(200).json(item);
     }catch(err){
         res.status(400).json({message: "error finding resource"});

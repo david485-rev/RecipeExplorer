@@ -5,8 +5,9 @@ const jwt = require("jsonwebtoken");
 require('dotenv').config();
 const secretKey = process.env.JWT_SECRET;
 const User = require('../model/user');
-const { createUser, queryUserByUsername, postProfile, queryByUuid, patchPassword} = require('../repository/user-dao');
-
+const { createUser, queryUserByUsername, postProfile, patchPassword} = require('../repository/user-dao');
+const { getItemByUuid } = require("../repository/general-dao.js");
+const { getDatabaseItem } = require('./general-service.js');
 const saltRounds = 10;
 
 async function register(reqBody) {
@@ -64,7 +65,7 @@ async function getUserByUsernamePassword(username, password){
 
 async function getInfoProfile(item) {
    try{
-    let data = queryByUuid(item);
+    let data = getDatabaseItem(item);
      return data;
    }catch(err){
     logger.error(err);
@@ -73,7 +74,7 @@ async function getInfoProfile(item) {
 }
 
 async function passwordChange(item, uuid, creation_date) {
-    const user = await queryByUuid(uuid);
+    const user = await getItemByUuid(uuid);
     if(!item.newPassword) {
         throw new error("New password can not be empty")
     }
