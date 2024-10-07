@@ -94,7 +94,6 @@ async function deleteRecipe(recipeId) {
   });
   try {
     const response = await docClient.send(command);
-    console.log(response);
     logger.info(`Deleted recipe: ${response}`);
     return response;
   } catch (err) {
