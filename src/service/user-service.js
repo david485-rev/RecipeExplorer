@@ -72,7 +72,7 @@ async function getInfoProfile(item) {
    }  
 }
 
-async function passwordChange(item, uuid, creation_date) {
+async function passwordChange(item, uuid) {
     const user = await queryByUuid(uuid);
     if(!item.newPassword) {
         throw new Error("New password can not be empty")
@@ -80,7 +80,7 @@ async function passwordChange(item, uuid, creation_date) {
     try{
         if(await bcrypt.compare(item.password, user.password)){
             let cryptPassword = await bcrypt.hash(item.newPassword, saltRounds);
-            let data = patchPassword(cryptPassword, uuid, creation_date);
+            let data = patchPassword(cryptPassword, uuid);
             return data; 
         } else throw new Error("password is not correct")
     }catch(err){
@@ -89,13 +89,12 @@ async function passwordChange(item, uuid, creation_date) {
     }
 }
 
-async function createProfile(item, uuid, creation_date) {
+async function createProfile(item, uuid) {
     try{
         let data = await postProfile({
         ...item
         },
-        uuid,
-        creation_date
+        uuid
         );
         return data;
     }catch(err){

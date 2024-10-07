@@ -1,4 +1,4 @@
-const { createUser, queryUserByUsername } = require('../src/repository/user-dao');
+const { createUser, queryUserByUsername} = require('../src/repository/user-dao');
 const { register } = require('../src/service/user-service');
 
 jest.mock('../src/repository/user-dao', () => {
@@ -72,6 +72,14 @@ describe('User Service Tests', () => {
         }).rejects.toThrow('user with username already exists!');
         expect(queryUserByUsername).toHaveBeenCalledTimes(1);
     });
+
+    test('password change with wrong current password should return wrong password', async ()=> {
+        const reqbody = {
+            password:"pass1",
+            newPassword:"pass2"
+        };
+
+    })
 
 
 });
