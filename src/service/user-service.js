@@ -10,7 +10,7 @@ const { createUser, queryUserByUsername, postProfile, queryByUuid, patchPassword
 const saltRounds = 10;
 
 async function register(reqBody) {
-    const { username, password, description } = reqBody;
+    const { username, password, description, picture } = reqBody;
 
     if(!username) {
         throw new Error('missing username');
@@ -28,7 +28,7 @@ async function register(reqBody) {
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     
-    const newUser = new User(username, hashedPassword, description);
+    const newUser = new User(username, hashedPassword, description, picture);
 
     try {
         const data = await createUser(newUser);
