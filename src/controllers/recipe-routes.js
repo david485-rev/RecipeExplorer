@@ -3,7 +3,8 @@ const router = express.Router();
 const {
   getRecipes,
   createRecipe,
-  editRecipe
+  editRecipe,
+  removeRecipe
 } = require("../service/recipe-service");
 
 router.get("/", async (req, res) => {
