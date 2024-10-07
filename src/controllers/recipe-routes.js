@@ -3,7 +3,8 @@ const router = express.Router();
 const {
   getRecipes,
   createRecipe,
-  editRecipe
+  editRecipe,
+  removeRecipe
 } = require("../service/recipe-service");
 
 router.get("/", async (req, res) => {
@@ -20,6 +21,12 @@ router.post("/", async (req, res) => {
 
 router.put("/", async (req, res) => {
   const response = await editRecipe(req.body);
+  res.status(response.status);
+  res.send(response.body);
+});
+
+router.delete("/:uuid", async (req, res) => {
+  const response = await removeRecipe(req.param.uuid);
   res.status(response.status);
   res.send(response.body);
 });
