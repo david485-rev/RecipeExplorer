@@ -26,5 +26,5 @@ async function getDatabaseItem(uuid){
 }
 
 module.exports = {
-    getItemByUuid
+    getDatabaseItem
 }
