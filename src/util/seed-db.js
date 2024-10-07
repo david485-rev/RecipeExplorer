@@ -25,7 +25,7 @@ const MAX_COMMENTS = 5;
 async function createFakeUsers() {
     const user_list = [];
     for (let count = 0; count < MAX_USERS; count++) {
-        user_list.push(new User(`test-user${count}`, `test-password${count}`, `Hi! I am test-user${count}`));
+        user_list.push(new User(`test-user${count}`, `test-password${count}`, `test${count}@gmail.com`, `Hi! I am test-user${count}`, `picture-link${count}`));
     }
     return user_list;
 }

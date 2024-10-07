@@ -1,7 +1,7 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const {
     DynamoDBDocumentClient,
-    QueryCommand
+    GetCommand
 } = require('@aws-sdk/lib-dynamodb');
 require('dotenv').config();
 const AWS_REGION = process.env.AWS_REGION;
@@ -13,25 +13,27 @@ const documentClient = DynamoDBDocumentClient.from(client);
 
 const TableName = 'RecipeExplorer';
 
-async function queryByUuid(uuid){
-    const command = new QueryCommand({
+/**
+ * 
+ * @param {*} uuid 
+ * @returns the item from DynamoDB, or null if it does not exist
+ */
+async function getItemByUuid(uuid) {
+    const command = new GetCommand({
         TableName,
-        KeyConditionExpression: "#uuid = :uuid",
-        ExpressionAttributeNames: { "#uuid": "uuid" }, 
-        ExpressionAttributeValues: { ":uuid": uuid }
+        Key: { "uuid": uuid }
     });
-    try{
+
+    try {
         const data = await documentClient.send(command);
-        if (data.Items) {
-            return data.Items[0];
-        }
-        return null;
-    }catch(err){
+
+        return data.Item;
+    } catch(err) {
         logger.error(err);
         throw new Error(err);
     }
 }
 
 module.exports = {
-    queryByUuid
+    getItemByUuid
 }
