@@ -5,9 +5,9 @@ const jwt = require("jsonwebtoken");
 require('dotenv').config();
 const secretKey = process.env.JWT_SECRET;
 const User = require('../model/user');
-const { createUser, queryUserByUsername, postProfile, patchPassword} = require('../repository/user-dao');
-const { getItemByUuid } = require("../repository/general-dao.js");
-const { getDatabaseItem } = require('./general-service.js');
+const { getItemByUuid } = require('../repository/general-dao')
+const { createUser, queryUserByUsername, postProfile, patchPassword, deleteUser} = require('../repository/user-dao');
+
 const saltRounds = 10;
 
 async function register(reqBody) {
@@ -105,10 +105,27 @@ async function createProfile(item, uuid, creation_date) {
     }
 }
 
+async function removeUser(reqParams) {
+    const { uuid } = reqParams;
+
+    if(!uuid) {
+        throw new Error('uuid missing');
+    }
+
+    try {
+        const data = await deleteUser(uuid);
+
+        return data;
+    } catch(err) {
+        throw new Error(err);
+    }
+}
+
 module.exports = {
     register,
     getUserByUsernamePassword,
     createProfile,
     getInfoProfile,
-    passwordChange
+    passwordChange,
+    removeUser
 }
