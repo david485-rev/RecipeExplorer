@@ -17,7 +17,7 @@ const TableName = "RecipeExplorer";
 async function queryRecipes() {
   const command = new QueryCommand({
     TableName,
-    IndexName: "type-creation_date-index",
+    IndexName: "type-index",
     KeyConditionExpression: "#type = :type",
     ExpressionAttributeNames: {
       "#type": "type"
@@ -52,7 +52,7 @@ async function insertRecipe(Recipe) {
 async function updateRecipe(Recipe) {
   const command = new UpdateCommand({
     TableName,
-    Key: { uuid: Recipe.uuid, creation_date: Recipe.creation_date },
+    Key: { uuid: Recipe.uuid },
     UpdateExpression:
       "Set #recipe_thumb = :recipe_thumb, #recipe_name = :recipe_name, #type = :type, #category = :category, #cuisine = :cuisine, #description = :description, #ingredients = :ingredients, #instructions = :instructions",
     ExpressionAttributeNames: {
@@ -68,7 +68,7 @@ async function updateRecipe(Recipe) {
     ExpressionAttributeValues: {
       ":recipe_thumb": Recipe.recipe_thumb,
       ":recipe_name": Recipe.recipe_name,
-      ":type": Recipe.type,
+      ":type": "recipe",
       ":category": Recipe.category,
       ":cuisine": Recipe.cuisine,
       ":description": Recipe.description,
