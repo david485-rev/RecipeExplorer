@@ -64,7 +64,6 @@ async function patchPassword(item, uuid, creation_date) {
         TableName: "RecipeExplorer",
         Key: { 
             'uuid' :uuid,
-            'creation_date':creation_date
         },
           UpdateExpression:'Set #password = :password',
           ExpressionAttributeNames: {
