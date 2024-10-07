@@ -12,16 +12,29 @@ async function postComment(authorUuid, reqBody) {
     if(!recipeUuid){
         throw new Error('missing recipe uuid');
     }
+    if (!authorUuid) {
+        throw new Error('missing author uuid');
+    }
     if (!description) {
         throw new Error('missing description');
     }
     if (!rating) {
         throw new Error('missing rating');
     }
+    const recipe = await queryByUuid(recipeUuid);
+    
+    if(recipe.type !== 'recipe'){
+        throw new Error('comment being attached to non-recipe entity');
+    }
+
     const newComment = new Comment(authorUuid, recipeUuid, description, rating);
 
     try {
         const data = await createComment(newComment);
+        console.log(data);
+        if(data.$metadata.httpStatusCode !== 200){
+            throw new Error("database error");
+        }
         return data;
     } catch (err) {
         logger.error(err);
