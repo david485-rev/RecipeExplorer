@@ -38,7 +38,7 @@ async function createUser(User) {
 async function queryUserByUsername(username) {
     const command = new QueryCommand({
         TableName,
-        IndexName: 'username-creation_date-index',
+        IndexName: 'username-index',
         KeyConditionExpression: '#username = :u',
         ExpressionAttributeNames: { '#username': 'username' },
         ExpressionAttributeValues: { ':u': username }
@@ -56,25 +56,6 @@ async function queryUserByUsername(username) {
         logger.error(err);
         throw new Error(err);
     }
-}
-
-
-async function queryByUuid(uuid) {
-    const command = new QueryCommand({
-        TableName,
-        KeyConditionExpression: '#uuid = :uuid',
-        ExpressionAttributeNames: { '#uuid': 'uuid' },
-        ExpressionAttributeValues: {':uuid': uuid }
-    });
-
-    try {
-        const data = await documentClient.send(command);
-        return data.Items[0];
-
-    } catch(err) {
-        logger.error(err);
-        throw new Error(err);
-    }
 } 
 
 // update password
@@ -83,7 +64,6 @@ async function patchPassword(item, uuid, creation_date) {
         TableName: "RecipeExplorer",
         Key: { 
             'uuid' :uuid,
-            'creation_date':creation_date
         },
           UpdateExpression:'Set #password = :password',
           ExpressionAttributeNames: {
@@ -108,7 +88,6 @@ async function postProfile(item, uuid, creation_date) {
         TableName: "RecipeExplorer",
         Key: { 
             'uuid' :uuid,
-            'creation_date':creation_date
         },
           UpdateExpression: 'Set #email = :email, #username = :username, #picture = :picture, #description = :description',
           ExpressionAttributeNames: {
