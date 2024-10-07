@@ -54,7 +54,7 @@ async function getUserByUsernamePassword(username, password){
     try{
         const user = await queryUserByUsername(username);
         if (await bcrypt.compare(password, user.password)) {
-            return { uuid: user.uuid, username: user.username, creation_date: user.creation_date};
+            return { uuid: user.uuid, username: user.username};
         }
             
     }catch(err){
@@ -76,7 +76,7 @@ async function getInfoProfile(item) {
 async function passwordChange(item, uuid) {
     const user = await getItemByUuid(uuid);
     if(!item.newPassword) {
-        throw new error("New password can not be empty")
+        throw new Error("New password can not be empty")
     }
     try{
         if(await bcrypt.compare(item.password, user.password)){
