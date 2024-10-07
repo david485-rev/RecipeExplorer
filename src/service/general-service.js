@@ -13,9 +13,7 @@ async function getItemByUuid(uuid){
         var keys = Object.keys(item);
         for (const key of keys) {
             if(key !== 'password'){
-                if(item[key]){
-                    newItem[key] = item[key];
-                }
+                newItem[key] = item[key];
             }
         }
         //logger.info("newItem is: " + JSON.stringify(newItem));
