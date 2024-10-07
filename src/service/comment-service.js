@@ -21,17 +21,17 @@ async function postComment(authorUuid, reqBody) {
     if (!rating) {
         throw new Error('missing rating');
     }
+    /* Depreciated
     const recipe = await queryByUuid(recipeUuid);
-    
+     
     if(recipe.type !== 'recipe'){
         throw new Error('comment being attached to non-recipe entity');
     }
-
+    */
     const newComment = new Comment(authorUuid, recipeUuid, description, rating);
 
     try {
         const data = await createComment(newComment);
-        console.log(data);
         if(data.$metadata.httpStatusCode !== 200){
             throw new Error("database error");
         }
