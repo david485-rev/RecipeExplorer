@@ -2,7 +2,8 @@ const { logger } = require("../util/logger");
 const {
   queryRecipes,
   insertRecipe,
-  updateRecipe
+  updateRecipe,
+  deleteRecipe
 } = require("../repository/recipe-dao");
 const Recipe = require("../model/recipe");
 
@@ -50,10 +51,22 @@ async function editRecipe(recipeData) {
   }
 }
 
+async function removeRecipe(recipeId) {
+  try {
+    const recipe = await deleteRecipe(recipeId);
+    response.status = recipe.$metadata.httpStatusCode;
+    response.body = recipe;
+    return response;
+  } catch (err) {
+    logger.error(err);
+    throw new Error(err);
+  }
+}
+
 function dataValidation(data) {
   if (Object.values(data).includes(undefined)) {
     throw new Error("All attributes must be present");
   }
 }
 
-module.exports = { getRecipes, createRecipe, editRecipe };
+module.exports = { getRecipes, createRecipe, editRecipe, removeRecipe };
