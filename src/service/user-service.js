@@ -5,7 +5,8 @@ const jwt = require("jsonwebtoken");
 require('dotenv').config();
 const secretKey = process.env.JWT_SECRET;
 const User = require('../model/user');
-const { createUser, queryUserByUsername, postProfile, queryByUuid, patchPassword} = require('../repository/user-dao');
+const { getItemByUuid } = require('../repository/general-dao')
+const { createUser, queryUserByUsername, postProfile,patchPassword} = require('../repository/user-dao');
 
 const saltRounds = 10;
 
@@ -53,7 +54,7 @@ async function getUserByUsernamePassword(username, password){
     try{
         const user = await queryUserByUsername(username);
         if (await bcrypt.compare(password, user.password)) {
-            return { uuid: user.uuid, username: user.username, creation_date: user.creation_date};
+            return { uuid: user.uuid, username: user.username};
         }
             
     }catch(err){
@@ -62,40 +63,29 @@ async function getUserByUsernamePassword(username, password){
     }
 }
 
-async function getInfoProfile(item) {
-   try{
-    let data = queryByUuid(item);
-     return data;
-   }catch(err){
-    logger.error(err);
-    throw new Error(err); 
-   }  
-}
-
-async function passwordChange(item, uuid, creation_date) {
-    const user = await queryByUuid(uuid);
+async function passwordChange(item, uuid) {
+    const user = await getItemByUuid(uuid);
     if(!item.newPassword) {
-        throw new error("New password can not be empty")
+        throw new Error("New password can not be empty")
     }
     try{
         if(await bcrypt.compare(item.password, user.password)){
             let cryptPassword = await bcrypt.hash(item.newPassword, saltRounds);
-            let data = patchPassword(cryptPassword, uuid, creation_date);
+            let data = patchPassword(cryptPassword, uuid);
             return data; 
-        } else throw new error("password is not correct")
+        } else throw new Error("password is not correct")
     }catch(err){
         logger.error(err);
         throw new Error(err);
     }
 }
 
-async function createProfile(item, uuid, creation_date) {
+async function createProfile(item, uuid) {
     try{
         let data = await postProfile({
         ...item
         },
-        uuid,
-        creation_date
+        uuid
         );
         return data;
     }catch(err){
@@ -108,6 +98,5 @@ module.exports = {
     register,
     getUserByUsernamePassword,
     createProfile,
-    getInfoProfile,
     passwordChange
 }

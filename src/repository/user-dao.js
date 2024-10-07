@@ -59,7 +59,7 @@ async function queryUserByUsername(username) {
 } 
 
 // update password
-async function patchPassword(item, uuid, creation_date) {
+async function patchPassword(item, uuid) {
     const command = new UpdateCommand({
         TableName: "RecipeExplorer",
         Key: { 
@@ -83,7 +83,7 @@ async function patchPassword(item, uuid, creation_date) {
 } 
 
 // update profile
-async function postProfile(item, uuid, creation_date) {
+async function postProfile(item, uuid) {
     const command = new UpdateCommand({
         TableName: "RecipeExplorer",
         Key: { 
@@ -118,6 +118,5 @@ module.exports = {
     createUser,
     queryUserByUsername,
     postProfile,
-    queryByUuid,
     patchPassword
 }

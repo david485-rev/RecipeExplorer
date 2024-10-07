@@ -4,7 +4,7 @@ const { authenticateToken } = require('../util/authentication.js')
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const { getUserByUsernamePassword, register, createProfile, passwordChange } = require('../service/user-service.js');
-const { getItemByUuid } = require('../service/general-service.js');
+const { getDatabaseItem } = require('../service/general-service.js');
 require('dotenv').config();
 const secretKey = process.env.JWT_SECRET;;
 
@@ -15,7 +15,6 @@ router.post("/login", async (req, res) => {
         token = jwt.sign({
             uuid: account.uuid,
             username: account.username,
-            creation_date: account.creation_date
         }, secretKey, {
             expiresIn: "7d"
         });
@@ -45,7 +44,7 @@ router.post('/register', async function (req, res, next) {
 router.get("/profile", authenticateToken, async (req, res) => {
     const user = req.user;
     try {
-        const data = await getItemByUuid(user.uuid);
+        const data = await getDatabaseItem(user.uuid);
         res.status(200).json(data);
     } catch (err) {
         logger.error(err.message);
