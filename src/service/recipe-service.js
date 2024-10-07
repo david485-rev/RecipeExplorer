@@ -51,12 +51,6 @@ async function editRecipe(recipeData) {
   }
 }
 
-function dataValidation(data) {
-  if (Object.values(data).includes(undefined)) {
-    throw new Error("All attributes must be present");
-  }
-}
-
 async function removeRecipe(recipeId) {
   try {
     const recipe = await deleteRecipe(recipeId);
@@ -68,4 +62,11 @@ async function removeRecipe(recipeId) {
     throw new Error(err);
   }
 }
+
+function dataValidation(data) {
+  if (Object.values(data).includes(undefined)) {
+    throw new Error("All attributes must be present");
+  }
+}
+
 module.exports = { getRecipes, createRecipe, editRecipe, removeRecipe };
