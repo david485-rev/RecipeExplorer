@@ -21,7 +21,10 @@ async function createComment(comment) {
         Item: comment
     });
     try {
+        /*
         const data = await documentClient.send(command);
+        */
+        const data = { $metadata: { httpStatusCode:"this is not being mocked"}};
         return data;
     } catch (err) {
         logger.error(err);
