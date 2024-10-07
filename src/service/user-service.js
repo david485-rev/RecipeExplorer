@@ -5,12 +5,12 @@ const jwt = require("jsonwebtoken");
 require('dotenv').config();
 const secretKey = process.env.JWT_SECRET;
 const User = require('../model/user');
-const { createUser, queryUserByUsername, patchProfile, queryByUuid } = require('../repository/user-dao');
+const { createUser, queryUserByUsername, postProfile, queryByUuid, patchPassword} = require('../repository/user-dao');
 
 const saltRounds = 10;
 
 async function register(reqBody) {
-    const { username, password } = reqBody;
+    const { username, password, email, description, picture } = reqBody;
 
     if(!username) {
         throw new Error('missing username');
@@ -18,6 +18,10 @@ async function register(reqBody) {
 
     if(!password) {
         throw new Error('missing password');
+    }
+
+    if(!email) {
+        throw new Error('missing email');
     }
 
     const user = await queryUserByUsername(username);
@@ -28,7 +32,7 @@ async function register(reqBody) {
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     
-    const newUser = new User(username, hashedPassword);
+    const newUser = new User(username, hashedPassword, email, description, picture);
 
     try {
         const data = await createUser(newUser);
@@ -49,13 +53,8 @@ async function getUserByUsernamePassword(username, password){
     try{
         const user = await queryUserByUsername(username);
         if (await bcrypt.compare(password, user.password)) {
-            return { uuid: user.uuid, username: user.username };
+            return { uuid: user.uuid, username: user.username, creation_date: user.creation_date};
         }
-        //logger.info(`user ${user.uuid} found`);
-        // logger.info("" + await bcrypt.hash(password, saltRound))
-        // if(await bcrypt.compare(password, user.password)){
-
-        //     return {user_id: user.user_id, username: user.username};
             
     }catch(err){
         logger.error(err);
@@ -73,9 +72,26 @@ async function getInfoProfile(item) {
    }  
 }
 
+async function passwordChange(item, uuid, creation_date) {
+    const user = await queryByUuid(uuid);
+    if(!item.newPassword) {
+        throw new error("New password can not be empty")
+    }
+    try{
+        if(await bcrypt.compare(item.password, user.password)){
+            let cryptPassword = await bcrypt.hash(item.newPassword, saltRounds);
+            let data = patchPassword(cryptPassword, uuid, creation_date);
+            return data; 
+        } else throw new error("password is not correct")
+    }catch(err){
+        logger.error(err);
+        throw new Error(err);
+    }
+}
+
 async function createProfile(item, uuid, creation_date) {
     try{
-        let data = await patchProfile({
+        let data = await postProfile({
         ...item
         },
         uuid,
@@ -88,19 +104,10 @@ async function createProfile(item, uuid, creation_date) {
     }
 }
 
-async function decodeJWT(token){
-    try{
-        const user = await jwt.verify(token, secretKey)
-        return user;
-    }catch(err){
-        console.error(err);
-    }
-}
-
 module.exports = {
     register,
     getUserByUsernamePassword,
     createProfile,
     getInfoProfile,
-    decodeJWT
+    passwordChange
 }

@@ -1,6 +1,6 @@
 const { logger } = require('../util/logger');
 
-const { queryByUuid } = require('../repository/general-dao.js');
+const { getItemByUuid } = require('../repository/general-dao.js');
 
 async function getItemByUuid(uuid){
     if(!uuid){
@@ -8,14 +8,12 @@ async function getItemByUuid(uuid){
     }
     try{
         const newItem = {};
-        const item = await queryByUuid(uuid);
+        const item = await getItemByUuid(uuid);
         //logger.info("item is: " + JSON.stringify(item));
         var keys = Object.keys(item);
         for (const key of keys) {
             if(key !== 'password'){
-                if(item[key]){
-                    newItem[key] = item[key];
-                }
+                newItem[key] = item[key];
             }
         }
         //logger.info("newItem is: " + JSON.stringify(newItem));

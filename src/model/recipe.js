@@ -4,15 +4,14 @@ class Recipe {
   constructor(recipeData) {
     this.uuid = uuid.v4();
     this.creation_date = Math.floor(new Date().getTime() / 1000);
-    this.recipe_thumb = recipeData.thumb;
-    this.recipe_name = recipeData.recipeName;
-    this.type = recipeData.type;
+    this.recipe_thumb = recipeData.recipe_thumb;
+    this.recipe_name = recipeData.recipe_name;
+    this.type = "recipe";
     this.category = recipeData.category;
     this.cuisine = recipeData.cuisine;
     this.description = recipeData.description;
     this.ingredients = recipeData.ingredients;
     this.instructions = recipeData.instructions;
-    this.comments = recipeData.comments;
   }
 }
 

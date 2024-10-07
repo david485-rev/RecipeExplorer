@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { getRecipes, createRecipe } = require("../service/recipe-service");
+const {
+  getRecipes,
+  createRecipe,
+  editRecipe
+} = require("../service/recipe-service");
 
 router.get("/", async (req, res) => {
   const response = await getRecipes();
@@ -10,6 +14,12 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   const response = await createRecipe(req.body);
+  res.status(response.status);
+  res.send(response.body);
+});
+
+router.put("/", async (req, res) => {
+  const response = await editRecipe(req.body);
   res.status(response.status);
   res.send(response.body);
 });
