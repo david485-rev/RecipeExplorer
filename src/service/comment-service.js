@@ -5,7 +5,7 @@ const { createComment,
     scanCommentsByRecipeUuid,
     updateComment
 } = require('../repository/comment-dao.js');
-const { queryByUuid } = require('../repository/general-dao.js')
+const { getItemByUuid } = require('../repository/general-dao.js')
 
 async function postComment(authorUuid, reqBody) {
     const { rating, description, recipeUuid } = reqBody;
@@ -22,7 +22,7 @@ async function postComment(authorUuid, reqBody) {
         throw new Error('missing rating');
     }
     /* Depreciated
-    const recipe = await queryByUuid(recipeUuid);
+    const recipe = await getItemByUuid(recipeUuid);
      
     if(recipe.type !== 'recipe'){
         throw new Error('comment being attached to non-recipe entity');
@@ -64,7 +64,7 @@ async function editComment(uuid, authorUuid, reqBody){
     }
     try{
         const { description, rating } = reqBody;
-        const oldComment = await queryByUuid(uuid);
+        const oldComment = await getItemByUuid(uuid);
         if(oldComment.type !== "comment"){
             throw new Error("uuid does not point to comment");
         }

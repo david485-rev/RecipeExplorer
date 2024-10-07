@@ -49,7 +49,6 @@ async function updateComment(uuid, creation_date, description, rating) {
         TableName,
         Key: {
             'uuid': uuid,
-            'creation_date': creation_date
         },
         UpdateExpression: 'Set #desc = :desc, #rate = :rate',
         ExpressionAttributeNames: {

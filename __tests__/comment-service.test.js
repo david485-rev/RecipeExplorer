@@ -1,6 +1,6 @@
 const commentService = require("../src/service/comment-service.js");
 const { createComment, scanCommentsByRecipeUuid, updateComment } = require("../src/repository/comment-dao.js");
-const { queryByUuid } = require("../src/repository/general-dao.js");
+const { getItemByUuid } = require("../src/repository/general-dao.js");
 
 jest.mock('../src/repository/comment-dao.js', () => {
     const originalModule = jest.requireActual('../src/repository/comment-dao.js');
@@ -17,14 +17,14 @@ jest.mock("../src/repository/general-dao.js", () => {
 
     return {
         ...originalModule,
-        queryByUuid:jest.fn()
+        getItemByUuid:jest.fn()
     }
 })
 
 describe("Testing comment creation via commentService.postComment", () => {
     afterEach(() => {
         createComment.mockClear();
-        //queryByUuid.mockClear();
+        //getItemByUuid.mockClear();
     });
     
     test("Creating a valid comment", async () => {
@@ -44,12 +44,12 @@ describe("Testing comment creation via commentService.postComment", () => {
         let result = null;
 
         createComment.mockReturnValueOnce(expectedResult);
-        //queryByUuid.mockReturnValueOnce(recipe);
+        //getItemByUuid.mockReturnValueOnce(recipe);
 
         result = await commentService.postComment(authorUuid, comment);
 
         expect(result).toEqual(expectedResult);
-        //expect(queryByUuid).toHaveBeenCalled();
+        //expect(getItemByUuid).toHaveBeenCalled();
         expect(createComment).toHaveBeenCalled();
     });
 
@@ -59,7 +59,7 @@ describe("Testing comment creation via commentService.postComment", () => {
         const authorUuid = "2";
 
         const expectedError = "missing description";
-        //queryByUuid.mockReturnValueOnce(recipe);
+        //getItemByUuid.mockReturnValueOnce(recipe);
 
         expect(async () => {
             await commentService.postComment(authorUuid, comment);
@@ -73,7 +73,7 @@ describe("Testing comment creation via commentService.postComment", () => {
         const authorUuid = null;
 
         const expectedError = "missing author uuid";
-        //queryByUuid.mockReturnValueOnce(recipe);
+        //getItemByUuid.mockReturnValueOnce(recipe);
 
         expect(async () => {
             await commentService.postComment(authorUuid, comment);
@@ -87,12 +87,12 @@ describe("Testing comment creation via commentService.postComment", () => {
         const authorUuid = "2";
         const expectedError = "comment being attached to non-recipe entity";
 
-        //queryByUuid.mockReturnValueOnce(recipe);
+        //getItemByUuid.mockReturnValueOnce(recipe);
 
         expect(async () => {
             await commentService.postComment(authorUuid, comment);
         }).rejects.toThrow(expectedError);
-        expect(queryByUuid).toHaveBeenCalled();
+        expect(getItemByUuid).toHaveBeenCalled();
         expect(createComment).not.toHaveBeenCalled();
     });
     */
@@ -113,12 +113,12 @@ describe("Testing comment creation via commentService.postComment", () => {
         };
 
         createComment.mockReturnValueOnce(databaseResult);
-        //queryByUuid.mockReturnValueOnce(recipe);
+        //getItemByUuid.mockReturnValueOnce(recipe);
 
         expect(async () => {
             await commentService.postComment(authorUuid, comment);
         }).rejects.toThrow(expectedError);
-        //expect(queryByUuid).toHaveBeenCalled();
+        //expect(getItemByUuid).toHaveBeenCalled();
         expect(createComment).toHaveBeenCalled();
     });
 });
@@ -167,7 +167,7 @@ describe("Testing getting comments via commentService.getRecipe", () => {
 describe("Testing updating a comment via commentService.editComment", () => {
     afterEach(() => {
         updateComment.mockClear();
-        queryByUuid.mockClear();
+        getItemByUuid.mockClear();
     });
     test("updating a comment with a new rating", async () => {
         const expectedResult = { uuid: "5", rating: 4, description: "hello", recipeUuid: "3", type:"comment", authorUuid:"2" };
@@ -177,12 +177,12 @@ describe("Testing updating a comment via commentService.editComment", () => {
         const uuid = "5"
         let result = null;
         updateComment.mockReturnValueOnce(expectedResult);
-        queryByUuid.mockReturnValueOnce(comment);
+        getItemByUuid.mockReturnValueOnce(comment);
 
         result = await commentService.editComment(uuid, authorUuid, reqBody);
 
         expect(result).toEqual(expectedResult);
-        expect(queryByUuid).toHaveBeenCalled();
+        expect(getItemByUuid).toHaveBeenCalled();
         expect(updateComment).toHaveBeenCalled();
     });
 
@@ -194,12 +194,12 @@ describe("Testing updating a comment via commentService.editComment", () => {
         const uuid = "5"
         let result = null;
         updateComment.mockReturnValueOnce(expectedResult);
-        queryByUuid.mockReturnValueOnce(comment);
+        getItemByUuid.mockReturnValueOnce(comment);
 
         result = await commentService.editComment(uuid, authorUuid, reqBody);
 
         expect(result).toEqual(expectedResult);
-        expect(queryByUuid).toHaveBeenCalled();
+        expect(getItemByUuid).toHaveBeenCalled();
         expect(updateComment).toHaveBeenCalled();
     });
 
@@ -210,12 +210,12 @@ describe("Testing updating a comment via commentService.editComment", () => {
         const authorUuid = "2";
         const uuid = "5"
         
-        queryByUuid.mockReturnValueOnce(comment);
+        getItemByUuid.mockReturnValueOnce(comment);
 
         expect(async () => {
             await commentService.editComment(uuid, authorUuid, reqBody);
         }).rejects.toThrow(expectedError);
-        expect(queryByUuid).toHaveBeenCalled();
+        expect(getItemByUuid).toHaveBeenCalled();
         expect(updateComment).not.toHaveBeenCalled();
     });
 
@@ -228,7 +228,7 @@ describe("Testing updating a comment via commentService.editComment", () => {
         expect(async () => {
             await commentService.editComment(uuid, authorUuid, reqBody);
         }).rejects.toThrow(expectedError);
-        expect(queryByUuid).not.toHaveBeenCalled();
+        expect(getItemByUuid).not.toHaveBeenCalled();
         expect(updateComment).not.toHaveBeenCalled();
     });
 
@@ -241,7 +241,7 @@ describe("Testing updating a comment via commentService.editComment", () => {
         expect(async () => {
             await commentService.editComment(uuid, authorUuid, reqBody);
         }).rejects.toThrow(expectedError);
-        expect(queryByUuid).not.toHaveBeenCalled();
+        expect(getItemByUuid).not.toHaveBeenCalled();
         expect(updateComment).not.toHaveBeenCalled();
     });
     
@@ -253,12 +253,12 @@ describe("Testing updating a comment via commentService.editComment", () => {
         const authorUuid = "6";
         const uuid = "5";
 
-        queryByUuid.mockReturnValueOnce(comment);
+        getItemByUuid.mockReturnValueOnce(comment);
 
         expect(async () => {
             await commentService.editComment(uuid, authorUuid, reqBody);
         }).rejects.toThrow(expectedError);
-        expect(queryByUuid).toHaveBeenCalled();
+        expect(getItemByUuid).toHaveBeenCalled();
         expect(updateComment).not.toHaveBeenCalled();
     });
     
@@ -269,12 +269,12 @@ describe("Testing updating a comment via commentService.editComment", () => {
         const authorUuid = "2";
         const uuid = "5";
 
-        queryByUuid.mockReturnValueOnce(comment);
+        getItemByUuid.mockReturnValueOnce(comment);
 
         expect(async () => {
             await commentService.editComment(uuid, authorUuid, reqBody);
         }).rejects.toThrow(expectedError);
-        expect(queryByUuid).toHaveBeenCalled();
+        expect(getItemByUuid).toHaveBeenCalled();
         expect(updateComment).not.toHaveBeenCalled();
     });
     
