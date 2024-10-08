@@ -6,7 +6,7 @@ require('dotenv').config();
 const secretKey = process.env.JWT_SECRET;
 const User = require('../model/user');
 const { getItemByUuid } = require('../repository/general-dao')
-const { createUser, queryUserByUsername, postProfile,patchPassword} = require('../repository/user-dao');
+const { createUser, queryUserByUsername, queryEmail, postProfile, patchPassword, deleteUser} = require('../repository/user-dao');
 
 const saltRounds = 10;
 
@@ -29,6 +29,12 @@ async function register(reqBody) {
 
     if(user) {
         throw new Error('user with username already exists!');
+    }
+
+    const email_exists = await queryEmail(email);
+
+    if(email_exists) {
+        throw new Error('email used already');
     }
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -106,9 +112,26 @@ async function createProfile(item, uuid) {
     }
 }
 
+async function removeUser(reqParams) {
+    const { uuid } = reqParams;
+
+    if(!uuid) {
+        throw new Error('uuid missing');
+    }
+
+    try {
+        const data = await deleteUser(uuid);
+
+        return data;
+    } catch(err) {
+        throw new Error(err);
+    }
+}
+
 module.exports = {
     register,
     getUserByUsernamePassword,
     createProfile,
-    passwordChange
+    passwordChange,
+    removeUser
 }

@@ -2,7 +2,8 @@ const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const {
     DynamoDBDocumentClient,
     PutCommand,
-    QueryCommand
+    ScanCommand,
+    UpdateCommand
 } = require('@aws-sdk/lib-dynamodb');
 require('dotenv').config();
 const AWS_REGION = process.env.AWS_REGION;
@@ -24,29 +25,55 @@ async function createComment(comment) {
         return data;
     } catch (err) {
         logger.error(err);
-        throw new Error(err)
+        throw new Error(err);
     }
 }
 
-async function queryCommentByUuid(uuid){
-    const command = new QueryCommand({
-        KeyConditionExpression: "#uuid = :uuid",
-        ExpressionAttributeNames: { "#id": "uuid" },
-        ExpressionAttributeValues: { ":id": uuid }
+async function scanCommentsByRecipeUuid(recipeUuid){
+    const command = new ScanCommand({
+        TableName,
+        FilterExpression: "#r = :r",
+        ExpressionAttributeNames: { "#r": "recipeUuid" },
+        ExpressionAttributeValues: { ":r": recipeUuid }
     });
     try{
         const data = await documentClient.send(command);
-        if (data.Items.length === 0) {
-            return false;
-        }
-        return data.Items[0];
+        return data.Items
     }catch(err){
         logger.error(err);
-        throw new Error(err)
+        throw new Error(err);
     }
 }
 
+async function updateComment(uuid, description, rating) {
+    const command = new UpdateCommand({
+        TableName,
+        Key: {
+            'uuid': uuid,
+        },
+        UpdateExpression: 'Set #desc = :desc, #rate = :rate',
+        ExpressionAttributeNames: {
+            '#desc': 'description',
+            '#rate': 'rating'
+        },
+        ExpressionAttributeValues: {
+            ':desc': description,
+            ':rate': rating
+        },
+        ReturnValues: "ALL_NEW"
+    });
+    try {
+        const data = await documentClient.send(command);
+        return data.Attributes;
+    } catch (err) {
+        console.error(err);
+        throw new Error(err);
+    }
+
+}
+
 module.exports = {
-    queryCommentByUuid,
-    createComment
+    createComment,
+    scanCommentsByRecipeUuid,
+    updateComment
 }

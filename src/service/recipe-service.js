@@ -2,17 +2,19 @@ const { logger } = require("../util/logger");
 const {
   queryRecipes,
   insertRecipe,
-  updateRecipe
+  updateRecipe,
+  deleteRecipe
 } = require("../repository/recipe-dao");
 const Recipe = require("../model/recipe");
 
-const response = { status: null, body: null };
+const response = { statusCode: null, data: null };
 
 async function getRecipes() {
   try {
     const recipes = await queryRecipes();
-    response.status = recipes.$metadata.httpStatusCode;
-    response.body = recipes.Items;
+
+    response.statusCode = recipes.$metadata.httpStatusCode;
+    response.data = recipes.Items;
     return response;
   } catch (err) {
     logger.error(err);
@@ -20,15 +22,17 @@ async function getRecipes() {
   }
 }
 
-async function createRecipe(recipeData) {
+async function createRecipe(recipeData, authorId) {
   try {
-    const newRecipe = new Recipe(recipeData);
+    validateId(authorId, "author_id");
+
+    const newRecipe = new Recipe(recipeData, authorId);
 
     dataValidation(newRecipe);
 
     const recipe = await insertRecipe(newRecipe);
-    response.status = recipe.$metadata.httpStatusCode;
-    response.body = recipe;
+    response.statusCode = recipe.$metadata.httpStatusCode;
+    response.data = recipe;
     return response;
   } catch (err) {
     logger.error(err);
@@ -36,24 +40,53 @@ async function createRecipe(recipeData) {
   }
 }
 
-async function editRecipe(recipeData) {
+async function editRecipe(recipeData, authorId) {
   try {
+    validateId(authorId, "author_id");
+
+    if (authorId != recipeData.author_id) {
+      response.statusCode = 403;
+      response.message =
+        "Only the recipe author is allowed to edit this recipe";
+      return response;
+    }
+
     dataValidation(recipeData);
 
     const recipe = await updateRecipe(recipeData);
-    response.status = recipe.$metadata.httpStatusCode;
-    response.body = recipe.Attributes;
+    response.statusCode = recipe.$metadata.httpStatusCode;
+    response.data = recipe.Attributes;
     return response;
   } catch (err) {
     logger.error(err);
     throw new Error(err);
+  }
+}
+
+async function removeRecipe(recipeId, authorId) {
+  try {
+    validateId(recipeId, "uuid");
+
+    const recipe = await deleteRecipe(recipeId, authorId);
+    response.statusCode = recipe.$metadata.httpStatusCode;
+    response.data = recipe;
+    return response;
+  } catch (err) {
+    logger.error(err);
+    throw new Error(err);
+  }
+}
+
+function validateId(id, attr) {
+  if (!id) {
+    throw new Error(`Missing ${attr}`);
   }
 }
 
 function dataValidation(data) {
   if (Object.values(data).includes(undefined)) {
-    throw new Error("All attributes must be present");
+    throw new Error("Missing attribute(s)");
   }
 }
 
-module.exports = { getRecipes, createRecipe, editRecipe };
+module.exports = { getRecipes, createRecipe, editRecipe, removeRecipe };

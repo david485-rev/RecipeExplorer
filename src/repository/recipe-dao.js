@@ -3,7 +3,8 @@ const {
   DynamoDBDocumentClient,
   PutCommand,
   QueryCommand,
-  UpdateCommand
+  UpdateCommand,
+  DeleteCommand
 } = require("@aws-sdk/lib-dynamodb");
 require("dotenv").config();
 const AWS_REGION = process.env.AWS_REGION;
@@ -32,6 +33,7 @@ async function queryRecipes() {
     return response;
   } catch (err) {
     logger.error(err);
+    throw new Error(err);
   }
 }
 
@@ -46,6 +48,7 @@ async function insertRecipe(Recipe) {
     return response;
   } catch (err) {
     logger.error(err);
+    throw new Error(err);
   }
 }
 
@@ -54,11 +57,10 @@ async function updateRecipe(Recipe) {
     TableName,
     Key: { uuid: Recipe.uuid },
     UpdateExpression:
-      "Set #recipe_thumb = :recipe_thumb, #recipe_name = :recipe_name, #type = :type, #category = :category, #cuisine = :cuisine, #description = :description, #ingredients = :ingredients, #instructions = :instructions",
+      "Set #recipe_thumb = :recipe_thumb, #recipe_name = :recipe_name, #category = :category, #cuisine = :cuisine, #description = :description, #ingredients = :ingredients, #instructions = :instructions",
     ExpressionAttributeNames: {
       "#recipe_thumb": "recipe_thumb",
       "#recipe_name": "recipe_name",
-      "#type": "type",
       "#category": "category",
       "#cuisine": "cuisine",
       "#description": "description",
@@ -68,7 +70,6 @@ async function updateRecipe(Recipe) {
     ExpressionAttributeValues: {
       ":recipe_thumb": Recipe.recipe_thumb,
       ":recipe_name": Recipe.recipe_name,
-      ":type": "recipe",
       ":category": Recipe.category,
       ":cuisine": Recipe.cuisine,
       ":description": Recipe.description,
@@ -83,7 +84,26 @@ async function updateRecipe(Recipe) {
     return response;
   } catch (err) {
     logger.error(err);
+    throw new Error(err);
   }
 }
 
-module.exports = { queryRecipes, insertRecipe, updateRecipe };
+async function deleteRecipe(recipeId, authorId) {
+  const command = new DeleteCommand({
+    TableName,
+    Key: { uuid: recipeId },
+    ConditionExpression: "#author_id = :authorId",
+    ExpressionAttributeNames: { "#author_id": "author_id" },
+    ExpressionAttributeValues: { ":authorId": authorId }
+  });
+  try {
+    const response = await docClient.send(command);
+    logger.info(`Deleted recipe: ${response}`);
+    return response;
+  } catch (err) {
+    logger.error(err);
+    throw new Error(err);
+  }
+}
+
+module.exports = { queryRecipes, insertRecipe, updateRecipe, deleteRecipe };
