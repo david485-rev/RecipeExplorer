@@ -1,5 +1,8 @@
+const bcrypt = require('bcrypt');
 const { createUser, queryUserByUsername, queryEmail } = require('../src/repository/user-dao');
-const { register } = require('../src/service/user-service');
+const { register, getUserByUsernamePassword } = require('../src/service/user-service');
+
+jest.mock('bcrypt');
 
 jest.mock('../src/repository/user-dao', () => {
     const originalModule = jest.requireActual('../src/repository/user-dao');
@@ -17,6 +20,7 @@ describe('User Service Tests', () => {
         // clean up mock functions after each test
         queryUserByUsername.mockClear();
         queryEmail.mockClear();
+        createUser.mockClear();
     })
 
     test('register should return a 200 status code for a successful register', async () => {
@@ -192,5 +196,28 @@ describe('User Service Tests', () => {
             await register(reqBody);
         }).rejects.toThrow('email used already');
         expect(queryUserByUsername).toHaveBeenCalledTimes(1);
+    });
+
+    test('login should return an object with uuid and username', async () => {
+        const username = 'Dolly56';
+        const password = 'vwAxtVTccddYBEf';
+
+        queryUserByUsername.mockReturnValueOnce({
+            uuid: '3c7f765b-2a79-4d90-9754-188073279f0c',
+            username: 'Dolly56',
+            password: '$2b$10$jzI6dBKtOt45QYITHcxEpu4.wMKBvUPJq3xM9fEcGnRHHL69LE/1q',
+            email: 'Amely.Sporer@gmail.com',
+            description: 'Qui incidunt ab minus quia debitis inventore enim et possimus.',
+            picture: 'http://placeimg.com/640/480'
+        });
+
+        bcrypt.compare.mockResolvedValue(true);
+
+        const account = await getUserByUsernamePassword(username, password);
+        
+        expect(account).toHaveProperty('uuid', '3c7f765b-2a79-4d90-9754-188073279f0c');
+        expect(account).toHaveProperty('username', 'Dolly56');
+        expect(queryUserByUsername).toHaveBeenCalledTimes(1);
+        expect(bcrypt.compare).toHaveBeenCalledTimes(1);
     });
 });
