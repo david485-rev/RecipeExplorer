@@ -55,11 +55,10 @@ async function updateRecipe(Recipe) {
     TableName,
     Key: { uuid: Recipe.uuid },
     UpdateExpression:
-      "Set #recipe_thumb = :recipe_thumb, #recipe_name = :recipe_name, #type = :type, #category = :category, #cuisine = :cuisine, #description = :description, #ingredients = :ingredients, #instructions = :instructions",
+      "Set #recipe_thumb = :recipe_thumb, #recipe_name = :recipe_name, #category = :category, #cuisine = :cuisine, #description = :description, #ingredients = :ingredients, #instructions = :instructions",
     ExpressionAttributeNames: {
       "#recipe_thumb": "recipe_thumb",
       "#recipe_name": "recipe_name",
-      "#type": "type",
       "#category": "category",
       "#cuisine": "cuisine",
       "#description": "description",
@@ -69,7 +68,6 @@ async function updateRecipe(Recipe) {
     ExpressionAttributeValues: {
       ":recipe_thumb": Recipe.recipe_thumb,
       ":recipe_name": Recipe.recipe_name,
-      ":type": "recipe",
       ":category": Recipe.category,
       ":cuisine": Recipe.cuisine,
       ":description": Recipe.description,
@@ -87,10 +85,13 @@ async function updateRecipe(Recipe) {
   }
 }
 
-async function deleteRecipe(recipeId) {
+async function deleteRecipe(recipeId, authorId) {
   const command = new DeleteCommand({
     TableName,
-    Key: { uuid: recipeId }
+    Key: { uuid: recipeId },
+    ConditionExpression: "#author_id = :authorId",
+    ExpressionAttributeNames: { "#author_id": "author_id" },
+    ExpressionAttributeValues: { ":authorId": authorId }
   });
   try {
     const response = await docClient.send(command);
