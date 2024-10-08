@@ -79,18 +79,14 @@ async function removeRecipe(recipeId, authorId) {
 
 function validateId(id, attr) {
   if (!id) {
-    response.status = 400;
-    response.body = `Missing ${attr}`;
+    throw new Error(`Missing ${attr}`);
   }
-  return response;
 }
 
 function dataValidation(data) {
   if (Object.values(data).includes(undefined)) {
-    response.status = 400;
-    response.body = "Missing attributes";
+    throw new Error("Missing attribute(s)");
   }
-  return response;
 }
 
 module.exports = { getRecipes, createRecipe, editRecipe, removeRecipe };
