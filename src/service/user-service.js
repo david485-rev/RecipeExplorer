@@ -93,10 +93,14 @@ async function createProfile(item, uuid) {
     if(!item.email) {
         throw new Error('missing email');
     }
-    const userData = await queryUserByUsername(item.username);
+    const userNameData = await queryUserByUsername(item.username);
+    const userEmailData = await queryEmail(item.email);
     const userPersonalData = await getItemByUuid(uuid);
-    if(userData && userPersonalData.username != item.username) {
-        throw new Error('user with username already exists!');
+    if(userPersonalData.username != item.username && userNameData) {
+        throw new Error('user with this username already exists!');
+    }
+    if(userPersonalData.email != item.email && userEmailData) {
+        throw new Error('this email already exist')
     }
 
     try{
