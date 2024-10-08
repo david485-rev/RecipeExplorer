@@ -3,7 +3,8 @@ const { logger } = require('../util/logger');
 const Comment = require('../model/comment.js');
 const { createComment, 
     scanCommentsByRecipeUuid,
-    updateComment
+    updateComment,
+    deleteComment
 } = require('../repository/comment-dao.js');
 const { getItemByUuid } = require('../repository/general-dao.js')
 
@@ -21,13 +22,13 @@ async function postComment(authorUuid, reqBody) {
     if (!rating) {
         throw new Error('missing rating');
     }
-    /* Depreciated
+    
     const recipe = await getItemByUuid(recipeUuid);
      
     if(recipe.type !== 'recipe'){
         throw new Error('comment being attached to non-recipe entity');
     }
-    */
+    
     const newComment = new Comment(authorUuid, recipeUuid, description, rating);
 
     try {
@@ -95,8 +96,49 @@ async function editComment(uuid, authorUuid, reqBody){
     }
 }
 
+async function removeComment(uuid, authorUuid){
+    if (!uuid) {
+        throw new Error("missing uuid");
+    }
+    if (!authorUuid) {
+        throw new Error("missing authorUuid");
+    }
+    try{
+        const comment = await getItemByUuid(uuid);
+        let userChecked = false;
+        if(comment && comment.type === 'comment'){
+            if (comment.authorUuid === authorUuid) {
+                userChecked = true;
+            }
+            else {
+                const recipe = await getItemByUuid(comment.recipeUuid)
+                if (recipe && recipe.type === 'recipe') {
+                    if (recipe.authorUuid === uuid){
+                        userChecked = true;
+                    }
+                }
+            }
+        }
+        if(userChecked){
+            const data = await deleteComment(uuid);
+            if (data.$metadata.httpStatusCode !== 200) {
+                throw new Error("database error");
+            }
+            return data;
+        }
+        else{
+            throw new Error('Forbidden Access')
+        }
+    }
+    catch(err){
+        logger.error(err);
+        throw new Error(err);
+    }
+}
+
 module.exports = {
     postComment,
     getRecipeComments,
-    editComment
+    editComment,
+    removeComment
 }

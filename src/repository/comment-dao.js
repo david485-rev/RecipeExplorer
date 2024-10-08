@@ -79,7 +79,8 @@ async function deleteComment(uuid){
     });
     try {
         const data = await documentClient.send(command);
-        return data.Attributes;
+        //logger.info(`Deleted recipe: ${data}`);
+        return data;
     }catch (err){
         console.error(err);
         throw new Error(err);
