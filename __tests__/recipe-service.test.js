@@ -1,5 +1,6 @@
 const { logger } = require("../src/util/logger");
 const uuid = require("uuid");
+const jwt = require("jsonwebtoken");
 const {
   getRecipes,
   createRecipe,
@@ -15,6 +16,9 @@ const Recipe = require("../src/model/recipe");
 jest.mock("../src/repository/recipe-dao");
 jest.mock("../src/util/logger");
 jest.mock("uuid");
+jest.mock("jsonwebtoken", () => ({
+  verify: jest.fn()
+}));
 
 describe("Recipe Service", () => {
   beforeEach(() => {
@@ -31,8 +35,8 @@ describe("Recipe Service", () => {
 
       const result = await getRecipes();
 
-      expect(result.status).toBe(200);
-      expect(result.body).toEqual(mockResponse.Items);
+      expect(result.statusCode).toBe(200);
+      expect(result.data).toEqual(mockResponse.Items);
       expect(queryRecipes).toHaveBeenCalledTimes(1);
     });
 
@@ -47,7 +51,11 @@ describe("Recipe Service", () => {
 
   describe("createRecipe", () => {
     it("should create a recipe successfully", async () => {
+      const authorId = "12345";
+      jwt.verify.mockReturnValue({ uuid: "12345" });
+
       const recipeData = {
+        author_id: authorId,
         recipe_thumb: "image_url",
         recipe_name: "New Recipe",
         type: "recipe",
@@ -58,11 +66,12 @@ describe("Recipe Service", () => {
         instructions: "Mix and bake."
       };
 
-      const newRecipe = new Recipe(recipeData);
+      const newRecipe = new Recipe(recipeData, authorId);
 
       const mockResponse = {
         $metadata: { httpStatusCode: 201 },
         uuid: "test-uuid",
+        author_id: authorId,
         creation_date: newRecipe.creation_date,
         recipe_thumb: recipeData.recipe_thumb,
         recipe_name: recipeData.recipe_name,
@@ -76,15 +85,19 @@ describe("Recipe Service", () => {
 
       insertRecipe.mockResolvedValue(mockResponse);
 
-      const result = await createRecipe(recipeData);
+      const result = await createRecipe(recipeData, authorId);
 
-      expect(result.status).toBe(201);
-      expect(result.body).toEqual(mockResponse);
+      expect(result.statusCode).toBe(201);
+      expect(result.data).toEqual(mockResponse);
       expect(insertRecipe).toHaveBeenCalledWith(newRecipe);
     });
 
     it("should throw an error if recipe data is invalid", async () => {
+      const authorId = "12345";
+      jwt.verify.mockReturnValue({ uuid: "12345" });
+
       const invalidData = {
+        author_id: authorId,
         recipe_thumb: "image_url",
         recipe_name: undefined,
         type: "recipe",
@@ -95,13 +108,19 @@ describe("Recipe Service", () => {
         instructions: "Mix and bake."
       };
 
-      await expect(createRecipe(invalidData)).rejects.toThrow(
-        "All attributes must be present"
+      const mockError = new Error("Missing attribute(s)");
+
+      await expect(createRecipe(invalidData, authorId)).rejects.toThrow(
+        mockError.message
       );
     });
 
     it("should log and throw an error if insertRecipe fails", async () => {
+      const authorId = "12345";
+      jwt.verify.mockReturnValue({ uuid: "12345" });
+
       const recipeData = {
+        author_id: authorId,
         recipe_thumb: "image_url",
         recipe_name: "New Recipe",
         type: "recipe",
@@ -116,15 +135,21 @@ describe("Recipe Service", () => {
 
       insertRecipe.mockRejectedValue(mockError);
 
-      await expect(createRecipe(recipeData)).rejects.toThrow("Insertion error");
+      await expect(createRecipe(recipeData, authorId)).rejects.toThrow(
+        mockError.message
+      );
       expect(logger.error).toHaveBeenCalledWith(mockError);
     });
   });
 
   describe("editRecipe", () => {
     it("should update an existing recipe and return the updated recipe", async () => {
+      const authorId = "12345";
+      jwt.verify.mockReturnValue({ uuid: "12345" });
+
       const recipeData = {
         uuid: "12345",
+        author_id: authorId,
         creation_date: 1234567,
         recipe_thumb: "image_url",
         recipe_name: "Updated Dessert Name",
@@ -145,15 +170,19 @@ describe("Recipe Service", () => {
 
       updateRecipe.mockResolvedValue(mockUpdatedRecipe);
 
-      const result = await editRecipe(recipeData);
+      const result = await editRecipe(recipeData, authorId);
 
-      expect(result.status).toBe(200);
-      expect(result.body).toEqual(mockUpdatedRecipe.Attributes);
+      expect(result.statusCode).toBe(200);
+      expect(result.data).toEqual(mockUpdatedRecipe.Attributes);
       expect(updateRecipe).toHaveBeenCalledWith(recipeData);
     });
 
     it("should log and throw an error if updateRecipe fails", async () => {
+      const authorId = "12345";
+      jwt.verify.mockReturnValue({ uuid: "12345" });
+
       const recipeData = {
+        author_id: authorId,
         uuid: "12345",
         creation_date: 1234567,
         recipe_thumb: "image_url",
@@ -170,8 +199,22 @@ describe("Recipe Service", () => {
 
       updateRecipe.mockRejectedValue(mockError);
 
-      await expect(editRecipe(recipeData)).rejects.toThrow("Update error");
+      await expect(editRecipe(recipeData, authorId)).rejects.toThrow(
+        mockError.message
+      );
       expect(logger.error).toHaveBeenCalledWith(mockError);
+    });
+  });
+
+  describe("removeRecipe", () => {
+    it("should delete an existing recipe", async () => {
+      const authorId = "12345";
+      const recipeId = "12345";
+      jwt.verify.mockReturnValue({ uuid: "12345" });
+
+      const result = await removeRecipe(recipeId, authorId);
+
+      expect(result.statusCode).toBe(200);
     });
   });
 });
