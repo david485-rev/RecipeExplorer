@@ -13,8 +13,8 @@ const {
 router.get("/", async (req, res) => {
   try {
     const response = await getRecipes();
-    res.status(response.status);
-    res.send(response.body);
+    res.status(response.statusCode);
+    res.send(response.data);
   } catch (err) {
     logger.error(err.message);
     res.status(400).send({ message: err.message });
@@ -35,8 +35,8 @@ router.get("/:uuid", async (req, res) => {
 router.post("/", authenticateToken, async (req, res) => {
   try {
     const response = await createRecipe(req.body, req.user.uuid);
-    res.status(response.status);
-    res.send(response.body);
+    res.status(response.statusCode);
+    res.send(response.data);
   } catch (err) {
     logger.error(err.message);
     res.status(400).send({ message: err.message });
@@ -46,8 +46,8 @@ router.post("/", authenticateToken, async (req, res) => {
 router.put("/", authenticateToken, async (req, res) => {
   try {
     const response = await editRecipe(req.body, req.user.uuid);
-    res.status(response.status);
-    res.send(response.body);
+    res.status(response.statusCode);
+    res.send(response.data);
   } catch (err) {
     logger.error(err.message);
     res.status(400).send({ message: err.message });
@@ -57,8 +57,8 @@ router.put("/", authenticateToken, async (req, res) => {
 router.delete("/:uuid", authenticateToken, async (req, res) => {
   try {
     const response = await removeRecipe(req.params.uuid, req.user.uuid);
-    res.status(response.status);
-    res.send(response.body);
+    res.status(response.statusCode);
+    res.send(response.data);
   } catch (err) {
     logger.error(err.message);
     res.status(400).send({ message: err.message });

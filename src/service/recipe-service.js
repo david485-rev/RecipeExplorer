@@ -7,14 +7,14 @@ const {
 } = require("../repository/recipe-dao");
 const Recipe = require("../model/recipe");
 
-const response = { status: null, body: null };
+const response = { statusCode: null, data: null };
 
 async function getRecipes() {
   try {
     const recipes = await queryRecipes();
 
-    response.status = recipes.$metadata.httpStatusCode;
-    response.body = recipes.Items;
+    response.statusCode = recipes.$metadata.httpStatusCode;
+    response.data = recipes.Items;
     return response;
   } catch (err) {
     logger.error(err);
@@ -31,8 +31,8 @@ async function createRecipe(recipeData, authorId) {
     dataValidation(newRecipe);
 
     const recipe = await insertRecipe(newRecipe);
-    response.status = recipe.$metadata.httpStatusCode;
-    response.body = recipe;
+    response.statusCode = recipe.$metadata.httpStatusCode;
+    response.data = recipe;
     return response;
   } catch (err) {
     logger.error(err);
@@ -45,7 +45,7 @@ async function editRecipe(recipeData, authorId) {
     validateId(authorId, "author_id");
 
     if (authorId != recipeData.author_id) {
-      response.status = 403;
+      response.statusCode = 403;
       response.message =
         "Only the recipe author is allowed to edit this recipe";
       return response;
@@ -54,8 +54,8 @@ async function editRecipe(recipeData, authorId) {
     dataValidation(recipeData);
 
     const recipe = await updateRecipe(recipeData);
-    response.status = recipe.$metadata.httpStatusCode;
-    response.body = recipe.Attributes;
+    response.statusCode = recipe.$metadata.httpStatusCode;
+    response.data = recipe.Attributes;
     return response;
   } catch (err) {
     logger.error(err);
@@ -68,8 +68,8 @@ async function removeRecipe(recipeId, authorId) {
     validateId(recipeId, "uuid");
 
     const recipe = await deleteRecipe(recipeId, authorId);
-    response.status = recipe.$metadata.httpStatusCode;
-    response.body = recipe;
+    response.statusCode = recipe.$metadata.httpStatusCode;
+    response.data = recipe;
     return response;
   } catch (err) {
     logger.error(err);
