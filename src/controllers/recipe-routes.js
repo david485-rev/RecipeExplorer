@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { logger } = require("winston");
+const { logger } = require("../util/logger.js");
 const { authenticateToken } = require("../util/authentication.js");
 const { getDatabaseItem } = require("../service/general-service");
 const {
