@@ -2,14 +2,12 @@ const {
   createUser,
   queryUserByUsername,
   patchPassword,
-  postProfile,
-  queryEmail
+  postProfile
 } = require("../src/repository/user-dao");
 const {
   register,
   passwordChange,
-  createProfile,
-  getUserByUsernamePassword
+  createProfile
 } = require("../src/service/user-service");
 const { getItemByUuid } = require("../src/repository/general-dao");
 const { getDatabaseItem } = require("../src/service/general-service");
@@ -22,7 +20,6 @@ jest.mock("../src/repository/user-dao", () => {
   return {
     ...originalModule,
     queryUserByUsername: jest.fn(),
-    queryEmail: jest.fn(),
     createUser: jest.fn(),
     patchPassword: jest.fn(),
     postProfile: jest.fn()

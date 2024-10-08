@@ -55,7 +55,7 @@ router.get("/profile", authenticateToken, async (req, res) => {
 router.post("/profile", authenticateToken, async (req, res) => {
     const user = req.user;
     try {
-        const data = await createProfile(req.body, user.uuid, user.creation_date);
+        const data = await createProfile(req.body, user.uuid);
         res.status(201).json({ message: 'Successfully updated' });
     } catch (err) {
         logger.error(err.message);
@@ -67,7 +67,7 @@ router.post("/profile", authenticateToken, async (req, res) => {
 router.patch("/password", authenticateToken, async (req, res) => {
     const user = req.user;
     try {
-        const data = await passwordChange(req.body, user.uuid, user.creation_date);
+        const data = await passwordChange(req.body, user.uuid);
         res.status(201).json({ message: 'Sucessfully updated' });
     } catch (err) {
         logger.error(err.message);
