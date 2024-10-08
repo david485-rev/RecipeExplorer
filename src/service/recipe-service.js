@@ -13,12 +13,6 @@ async function getRecipes() {
   try {
     const recipes = await queryRecipes();
 
-    if (!recipes.Items.length) {
-      response.status = 404;
-      response.body = "Recipes not found";
-      return response;
-    }
-
     response.status = recipes.$metadata.httpStatusCode;
     response.body = recipes.Items;
     return response;
@@ -30,6 +24,8 @@ async function getRecipes() {
 
 async function createRecipe(recipeData, authorId) {
   try {
+    validateId(authorId, "author_id");
+
     const newRecipe = new Recipe(recipeData, authorId);
 
     dataValidation(newRecipe);
@@ -46,6 +42,8 @@ async function createRecipe(recipeData, authorId) {
 
 async function editRecipe(recipeData, authorId) {
   try {
+    validateId(authorId, "author_id");
+
     if (authorId != recipeData.author_id) {
       response.status = 403;
       response.message =
@@ -67,11 +65,7 @@ async function editRecipe(recipeData, authorId) {
 
 async function removeRecipe(recipeId, authorId) {
   try {
-    if (!recipeId) {
-      response.status = 400;
-      response.body = "Missing recipe id (uuid)";
-      return response;
-    }
+    validateId(recipeId, "uuid");
 
     const recipe = await deleteRecipe(recipeId, authorId);
     response.status = recipe.$metadata.httpStatusCode;
@@ -83,12 +77,20 @@ async function removeRecipe(recipeId, authorId) {
   }
 }
 
+function validateId(id, attr) {
+  if (!id) {
+    response.status = 400;
+    response.body = `Missing ${attr}`;
+  }
+  return response;
+}
+
 function dataValidation(data) {
   if (Object.values(data).includes(undefined)) {
     response.status = 400;
     response.body = "Missing attributes";
-    return response;
   }
+  return response;
 }
 
 module.exports = { getRecipes, createRecipe, editRecipe, removeRecipe };
