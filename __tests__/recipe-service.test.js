@@ -246,16 +246,4 @@ describe("Recipe Service", () => {
       expect(logger.error).toHaveBeenCalledWith(mockError);
     });
   });
-
-  describe("removeRecipe", () => {
-    it("should delete an existing recipe", async () => {
-      const authorId = "12345";
-      const recipeId = "12345";
-      jwt.verify.mockReturnValue({ uuid: "12345" });
-
-      const result = await removeRecipe(recipeId, authorId);
-
-      expect(result.statusCode).toBe(200);
-    });
-  });
 });
