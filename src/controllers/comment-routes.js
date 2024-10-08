@@ -1,7 +1,7 @@
 const express = require("express");
 const { logger } = require('../util/logger.js');
 const router = express.Router();
-const { postComment, getRecipeComments, editComment } = require('../service/comment-service.js');
+const { postComment, getRecipeComments, editComment, removeComment } = require('../service/comment-service.js');
 const { authenticateToken } = require('../util/authentication.js')
 
 
@@ -50,12 +50,12 @@ router.put("/:uuid", authenticateToken, async (req, res) => {
 
 router.delete("/:uuid", authenticateToken, async (req, res) => {
     try {
-        const comment = await editComment(req.params.uuid, req.user.uuid);
+        const comment = await removeComment(req.params.uuid, req.user.uuid);
         if (comment) {
             res.status(200).json(comment);
             return;
         }
-        res.status(400).json({ message: "error updating comment" });
+        res.status(400).json({ message: "error deleting comment" });
     } catch (err) {
         logger.error(err);
         if (err === "Forbidden Access") {
