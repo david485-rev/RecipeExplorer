@@ -16,9 +16,10 @@ describe('User Service Tests', () => {
     afterEach(() => {
         // clean up mock functions after each test
         queryUserByUsername.mockClear();
+        queryEmail.mockClear();
     })
 
-    test('register should return metadata on a successful register', async () => {
+    test('register should return a 200 status code for a successful register', async () => {
         const mockRequestBody = {
             username: 'david',
             password: 'david',
@@ -28,11 +29,83 @@ describe('User Service Tests', () => {
         };
 
         queryUserByUsername.mockReturnValueOnce(false);
+        queryEmail.mockReturnValueOnce(false);
+        createUser.mockReturnValueOnce({
+            '$metadata': {
+              httpStatusCode: 200,
+              requestId: 'DS9E6PBM40118SNLH55DC8GE0JVV4KQNSO5AEMVJF66Q9ASUAAJG',
+              extendedRequestId: undefined,
+              cfId: undefined,
+              attempts: 1,
+              totalRetryDelay: 0
+            }
+        });
 
         const result = await register(mockRequestBody);
 
-        expect(result).not.toBe(null);
+        expect(result).toHaveProperty('$metadata.httpStatusCode', 200);
         expect(queryUserByUsername).toHaveBeenCalledTimes(1);
+        expect(queryEmail).toHaveBeenCalledTimes(1);
+        expect(createUser).toHaveBeenCalledTimes(1);
+    });
+
+    test('register should return a 200 status code for a successful register with a missing description', async () => {
+        const mockRequestBody = {
+            username: 'david',
+            password: 'david',
+            email: 'david@gmail.com',
+            description: null,
+            picture: 'this is optional'
+        };
+
+        queryUserByUsername.mockReturnValueOnce(false);
+        queryEmail.mockReturnValueOnce(false);
+        createUser.mockReturnValueOnce({
+            '$metadata': {
+              httpStatusCode: 200,
+              requestId: 'DS9E6PBM40118SNLH55DC8GE0JVV4KQNSO5AEMVJF66Q9ASUAAJG',
+              extendedRequestId: undefined,
+              cfId: undefined,
+              attempts: 1,
+              totalRetryDelay: 0
+            }
+        });
+
+        const result = await register(mockRequestBody);
+
+        expect(result).toHaveProperty('$metadata.httpStatusCode', 200);
+        expect(queryUserByUsername).toHaveBeenCalledTimes(1);
+        expect(queryEmail).toHaveBeenCalledTimes(1);
+        expect(createUser).toHaveBeenCalledTimes(1);
+    });
+
+    test('register should return a 200 status code for a successful register with a missing picture', async () => {
+        const mockRequestBody = {
+            username: 'david',
+            password: 'david',
+            email: 'david@gmail.com',
+            description: 'this can be null',
+            picture: null
+        };
+
+        queryUserByUsername.mockReturnValueOnce(false);
+        queryEmail.mockReturnValueOnce(false);
+        createUser.mockReturnValueOnce({
+            '$metadata': {
+              httpStatusCode: 200,
+              requestId: 'DS9E6PBM40118SNLH55DC8GE0JVV4KQNSO5AEMVJF66Q9ASUAAJG',
+              extendedRequestId: undefined,
+              cfId: undefined,
+              attempts: 1,
+              totalRetryDelay: 0
+            }
+        });
+
+        const result = await register(mockRequestBody);
+
+        expect(result).toHaveProperty('$metadata.httpStatusCode', 200);
+        expect(queryUserByUsername).toHaveBeenCalledTimes(1);
+        expect(queryEmail).toHaveBeenCalledTimes(1);
         expect(createUser).toHaveBeenCalledTimes(1);
     });
 
