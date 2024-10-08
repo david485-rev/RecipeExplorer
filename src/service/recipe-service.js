@@ -86,7 +86,7 @@ async function removeRecipe(recipeId, authorId) {
 function dataValidation(data) {
   if (Object.values(data).includes(undefined)) {
     response.status = 400;
-    response.body = "Missing attributes.";
+    response.body = "Missing attributes";
     return response;
   }
 }
