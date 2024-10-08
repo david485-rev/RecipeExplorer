@@ -33,6 +33,7 @@ async function queryRecipes() {
     return response;
   } catch (err) {
     logger.error(err);
+    throw new Error(err);
   }
 }
 
@@ -47,6 +48,7 @@ async function insertRecipe(Recipe) {
     return response;
   } catch (err) {
     logger.error(err);
+    throw new Error(err);
   }
 }
 
@@ -82,6 +84,7 @@ async function updateRecipe(Recipe) {
     return response;
   } catch (err) {
     logger.error(err);
+    throw new Error(err);
   }
 }
 
@@ -99,6 +102,7 @@ async function deleteRecipe(recipeId, authorId) {
     return response;
   } catch (err) {
     logger.error(err);
+    throw new Error(err);
   }
 }
 
