@@ -1,5 +1,6 @@
 const { logger } = require("../src/util/logger");
 const uuid = require("uuid");
+const jwt = require("jsonwebtoken");
 const {
   getRecipes,
   createRecipe,
@@ -17,6 +18,9 @@ const Recipe = require("../src/model/recipe");
 jest.mock("../src/repository/recipe-dao");
 jest.mock("../src/util/logger");
 jest.mock("uuid");
+jest.mock("jsonwebtoken", () => ({
+  verify: jest.fn()
+}));
 
 describe("Recipe Service", () => {
   beforeEach(() => {
@@ -142,6 +146,9 @@ describe("Recipe Service", () => {
     const authorId = "12345";
 
     it("should update an existing recipe and return the updated recipe", async () => {
+      const authorId = "12345";
+      jwt.verify.mockReturnValue({ uuid: "12345" });
+
       const recipeData = {
         uuid: "12345",
         author_id: authorId,
@@ -173,6 +180,9 @@ describe("Recipe Service", () => {
     });
 
     it("should log and throw an error if updateRecipe fails", async () => {
+      const authorId = "12345";
+      jwt.verify.mockReturnValue({ uuid: "12345" });
+
       const recipeData = {
         author_id: authorId,
         uuid: "12345",
@@ -234,6 +244,18 @@ describe("Recipe Service", () => {
         mockError.message
       );
       expect(logger.error).toHaveBeenCalledWith(mockError);
+    });
+  });
+
+  describe("removeRecipe", () => {
+    it("should delete an existing recipe", async () => {
+      const authorId = "12345";
+      const recipeId = "12345";
+      jwt.verify.mockReturnValue({ uuid: "12345" });
+
+      const result = await removeRecipe(recipeId, authorId);
+
+      expect(result.statusCode).toBe(200);
     });
   });
 });
