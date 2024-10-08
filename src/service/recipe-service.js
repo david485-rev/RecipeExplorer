@@ -12,6 +12,13 @@ const response = { status: null, body: null };
 async function getRecipes() {
   try {
     const recipes = await queryRecipes();
+
+    if (!recipes.Items.length) {
+      response.status = 404;
+      response.body = "Recipes not found";
+      return response;
+    }
+
     response.status = recipes.$metadata.httpStatusCode;
     response.body = recipes.Items;
     return response;
@@ -21,9 +28,9 @@ async function getRecipes() {
   }
 }
 
-async function createRecipe(recipeData) {
+async function createRecipe(recipeData, authorId) {
   try {
-    const newRecipe = new Recipe(recipeData);
+    const newRecipe = new Recipe(recipeData, authorId);
 
     dataValidation(newRecipe);
 
@@ -37,8 +44,15 @@ async function createRecipe(recipeData) {
   }
 }
 
-async function editRecipe(recipeData) {
+async function editRecipe(recipeData, authorId) {
   try {
+    if (authorId != recipeData.author_id) {
+      response.status = 403;
+      response.message =
+        "Only the recipe author is allowed to edit this recipe";
+      return response;
+    }
+
     dataValidation(recipeData);
 
     const recipe = await updateRecipe(recipeData);
@@ -51,9 +65,15 @@ async function editRecipe(recipeData) {
   }
 }
 
-async function removeRecipe(recipeId) {
+async function removeRecipe(recipeId, authorId) {
   try {
-    const recipe = await deleteRecipe(recipeId);
+    if (!recipeId) {
+      response.status = 400;
+      response.body = "Missing recipe id (uuid)";
+      return response;
+    }
+
+    const recipe = await deleteRecipe(recipeId, authorId);
     response.status = recipe.$metadata.httpStatusCode;
     response.body = recipe;
     return response;
@@ -65,7 +85,9 @@ async function removeRecipe(recipeId) {
 
 function dataValidation(data) {
   if (Object.values(data).includes(undefined)) {
-    throw new Error("All attributes must be present");
+    response.status = 400;
+    response.body = "Missing attributes.";
+    return response;
   }
 }
 
