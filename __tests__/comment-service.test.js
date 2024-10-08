@@ -1,5 +1,5 @@
 const commentService = require("../src/service/comment-service.js");
-const { createComment, scanCommentsByRecipeUuid, updateComment } = require("../src/repository/comment-dao.js");
+const { createComment, scanCommentsByRecipeUuid, updateComment, deleteComment } = require("../src/repository/comment-dao.js");
 const { getItemByUuid } = require("../src/repository/general-dao.js");
 
 jest.mock('../src/repository/comment-dao.js', () => {
@@ -9,7 +9,8 @@ jest.mock('../src/repository/comment-dao.js', () => {
         ...originalModule,
         scanCommentsByRecipeUuid: jest.fn(),
         createComment: jest.fn(),
-        updateComment: jest.fn()
+        updateComment: jest.fn(),
+        deleteComment: jest.fn()
     }
 });
 jest.mock("../src/repository/general-dao.js", () => {
@@ -24,12 +25,14 @@ jest.mock("../src/repository/general-dao.js", () => {
 describe("Testing comment creation via commentService.postComment", () => {
     afterEach(() => {
         createComment.mockClear();
-        //getItemByUuid.mockClear();
+        getItemByUuid.mockClear();
+        createComment.mockReset();
+        getItemByUuid.mockReset();
     });
     
     test("Creating a valid comment", async () => {
         const comment = { rating: 4, description: "fake desc", recipeUuid: "3" };
-        //const recipe = { uuid: "3", type: "recipe" };
+        const recipe = { uuid: "3", type: "recipe" };
         const authorUuid = "2";
         const expectedResult = {
             $metadata: {
@@ -44,22 +47,21 @@ describe("Testing comment creation via commentService.postComment", () => {
         let result = null;
 
         createComment.mockReturnValueOnce(expectedResult);
-        //getItemByUuid.mockReturnValueOnce(recipe);
+        getItemByUuid.mockReturnValueOnce(recipe);
 
         result = await commentService.postComment(authorUuid, comment);
 
         expect(result).toEqual(expectedResult);
-        //expect(getItemByUuid).toHaveBeenCalled();
+        expect(getItemByUuid).toHaveBeenCalled();
         expect(createComment).toHaveBeenCalled();
     });
 
     test("Creating an invalid comment no description", async () => {
         const comment = { rating: 4, description: "", recipeUuid: "3" };
-        //const recipe = { uuid: "3", type: "recipe" };
+        const recipe = { uuid: "3", type: "recipe" };
         const authorUuid = "2";
 
         const expectedError = "missing description";
-        //getItemByUuid.mockReturnValueOnce(recipe);
 
         expect(async () => {
             await commentService.postComment(authorUuid, comment);
@@ -69,25 +71,24 @@ describe("Testing comment creation via commentService.postComment", () => {
 
     test("Creating an invalid comment no authorId", async () => {
         const comment = { rating: 4, description: "Hello", recipeUuid: "3" };
-        //const recipe = { uuid: "3", type: "recipe" };
+        const recipe = { uuid: "3", type: "recipe" };
         const authorUuid = null;
 
         const expectedError = "missing author uuid";
-        //getItemByUuid.mockReturnValueOnce(recipe);
 
         expect(async () => {
             await commentService.postComment(authorUuid, comment);
         }).rejects.toThrow(expectedError);
         expect(createComment).not.toHaveBeenCalled();
     });
-    /*
+    
     test("Creating an invalid comment incorrect recipeUuid", async () => {
         const comment = { rating: 4, description: "Hello", recipeUuid: "2" };
         const recipe = { uuid: "2", type: "user" };
         const authorUuid = "2";
         const expectedError = "comment being attached to non-recipe entity";
 
-        //getItemByUuid.mockReturnValueOnce(recipe);
+        getItemByUuid.mockReturnValueOnce(recipe);
 
         expect(async () => {
             await commentService.postComment(authorUuid, comment);
@@ -95,10 +96,10 @@ describe("Testing comment creation via commentService.postComment", () => {
         expect(getItemByUuid).toHaveBeenCalled();
         expect(createComment).not.toHaveBeenCalled();
     });
-    */
+    
     test("Creating an invalid comment bad database return", async () => {
         const comment = { rating: 4, description: "Hello", recipeUuid: "3" };
-        //const recipe = { uuid: "3", type: "recipe" };
+        const recipe = { uuid: "3", type: "recipe" };
         const authorUuid = "2";
         const expectedError = "database error";
         const databaseResult = {
@@ -113,19 +114,19 @@ describe("Testing comment creation via commentService.postComment", () => {
         };
 
         createComment.mockReturnValueOnce(databaseResult);
-        //getItemByUuid.mockReturnValueOnce(recipe);
+        getItemByUuid.mockReturnValueOnce(recipe);
 
         expect(async () => {
             await commentService.postComment(authorUuid, comment);
         }).rejects.toThrow(expectedError);
-        //expect(getItemByUuid).toHaveBeenCalled();
-        expect(createComment).toHaveBeenCalled();
+        expect(getItemByUuid).toHaveBeenCalled();
     });
 });
 
 describe("Testing getting comments via commentService.getRecipe", () => {
     afterEach(() => {
         scanCommentsByRecipeUuid.mockClear();
+        scanCommentsByRecipeUuid.mockReset();
     });
 
     test("getting all comments on a valid recipeUuid", async () => {
@@ -168,6 +169,8 @@ describe("Testing updating a comment via commentService.editComment", () => {
     afterEach(() => {
         updateComment.mockClear();
         getItemByUuid.mockClear();
+        updateComment.mockReset();
+        getItemByUuid.mockReset();
     });
     test("updating a comment with a new rating", async () => {
         const expectedResult = { uuid: "5", rating: 4, description: "hello", recipeUuid: "3", type:"comment", authorUuid:"2" };
@@ -279,3 +282,110 @@ describe("Testing updating a comment via commentService.editComment", () => {
     });
     
 });
+
+describe("Testing deleting a comment via commentService.removeComment", () => {
+    afterEach(() => {
+        deleteComment.mockClear();
+        getItemByUuid.mockClear();
+        deleteComment.mockReset();
+        getItemByUuid.mockReset();
+    });
+
+    test("deleting a comment with author Id", async () => {
+        const uuid = "3";
+        const authorUuid = "1";
+        const comment = { uuid: "3", type: "comment", authorUuid: "1",  recipeUuid: "6"};
+        const recipe = { uuid: "6", type: "recipe", authorUuid: "4"};
+        const expectedResult = {$metadata: {httpStatusCode: 200,}}
+        let result = null;
+        
+        getItemByUuid.mockReturnValueOnce(comment);
+        getItemByUuid.mockReturnValueOnce(recipe);
+        deleteComment.mockReturnValueOnce(expectedResult);
+
+        result = await commentService.removeComment(uuid, authorUuid);
+    
+        expect(result).toEqual(expectedResult);
+        expect(getItemByUuid).toHaveBeenCalled();
+        expect(deleteComment).toHaveBeenCalled();
+    });
+
+    test("deleting a comment with recipe author id", async () => {
+        const uuid = "3";
+        const authorUuid = "4";
+        const comment = { uuid: "3", type: "comment", authorUuid: "1", recipeUuid: "6" };
+        const recipe = { uuid: "6", type: "recipe", authorUuid: "4" };
+        const expectedResult = { $metadata: { httpStatusCode: 200, } }
+        let result = null;
+
+        getItemByUuid.mockReturnValueOnce(comment);
+        getItemByUuid.mockReturnValueOnce(recipe);
+        deleteComment.mockReturnValueOnce(expectedResult);
+
+        result = await commentService.removeComment(uuid, authorUuid);
+
+        expect(result).toEqual(expectedResult);
+        expect(getItemByUuid).toHaveBeenCalledTimes(2);
+        expect(deleteComment).toHaveBeenCalled();
+    });
+
+    test("deleting a comment with invalid id", async () => {
+        const uuid = "3";
+        const authorUuid = "5";
+        const comment = { uuid: "3", type: "comment", authorUuid: "1", recipeUuid: "6" };
+        const recipe = { uuid: "6", type: "recipe", authorUuid: "4" };
+        const expectedResult = { $metadata: { httpStatusCode: 200, } }
+        const expectedError = 'Forbidden Access';
+        let result = null;
+
+        getItemByUuid.mockReturnValueOnce(comment);
+        getItemByUuid.mockReturnValueOnce(recipe);
+        deleteComment.mockReturnValueOnce(expectedResult);
+
+        expect(async () => {
+            await commentService.removeComment(uuid, authorUuid);
+        }).rejects.toThrow(expectedError);
+        expect(getItemByUuid).toHaveBeenCalled();
+        expect(deleteComment).not.toHaveBeenCalled();
+    });
+    test("deleting a comment with no uuid", async () => {
+        const uuid = null;
+        const authorUuid = "5";
+        const comment = { uuid: "3", type: "comment", authorUuid: "1", recipeUuid: "6" };
+        const recipe = { uuid: "6", type: "recipe", authorUuid: "4" };
+        const expectedResult = { $metadata: { httpStatusCode: 200, } };
+        const expectedError = 'missing uuid';
+        let result = null;
+
+        getItemByUuid.mockReturnValueOnce(comment);
+        getItemByUuid.mockReturnValueOnce(recipe);
+        deleteComment.mockReturnValueOnce(expectedResult);
+
+
+        expect(async () => {
+            await commentService.removeComment(uuid, authorUuid);
+        }).rejects.toThrow(expectedError);
+        expect(getItemByUuid).not.toHaveBeenCalled();
+        expect(deleteComment).not.toHaveBeenCalled();
+    });
+    test("deleting a comment uuid going to incorrect db item", async () => {
+        const uuid = "6";
+        const authorUuid = "5";
+        const comment = { uuid: "3", type: "comment", authorUuid: "1", recipeUuid: "6" };
+        const recipe = { uuid: "6", type: "recipe", authorUuid: "4" };
+        const expectedResult = { $metadata: { httpStatusCode: 200, } };
+        const expectedError = 'Forbidden Access';
+        let result = null;
+
+        getItemByUuid.mockReturnValueOnce(recipe);
+        getItemByUuid.mockReturnValueOnce(comment);
+        deleteComment.mockReturnValueOnce(expectedResult);
+
+
+        expect(async () => {
+            await commentService.removeComment(uuid, authorUuid);
+        }).rejects.toThrow(expectedError);
+        expect(getItemByUuid).toHaveBeenCalled();
+        expect(deleteComment).not.toHaveBeenCalled();
+    });
+})
