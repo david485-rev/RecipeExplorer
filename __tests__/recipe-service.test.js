@@ -4,12 +4,14 @@ const jwt = require("jsonwebtoken");
 const {
   getRecipes,
   createRecipe,
-  editRecipe
+  editRecipe,
+  removeRecipe
 } = require("../src/service/recipe-service");
 const {
   queryRecipes,
   insertRecipe,
-  updateRecipe
+  updateRecipe,
+  deleteRecipe
 } = require("../src/repository/recipe-dao");
 const Recipe = require("../src/model/recipe");
 
@@ -207,14 +209,33 @@ describe("Recipe Service", () => {
   });
 
   describe("removeRecipe", () => {
+    const authorId = "12345";
+    const recipeId = "12345";
+
     it("should delete an existing recipe", async () => {
-      const authorId = "12345";
-      const recipeId = "12345";
+      const mockResponse = {
+        $metadata: { httpStatusCode: 200 },
+        data: "Deleted recipe data"
+      };
+
+      deleteRecipe.mockResolvedValue(mockResponse);
+
       jwt.verify.mockReturnValue({ uuid: "12345" });
 
       const result = await removeRecipe(recipeId, authorId);
 
-      expect(result.statusCode).toBe(200);
+      expect(result).toEqual({
+        statusCode: 200,
+        data: mockResponse
+      });
+      expect(deleteRecipe).toHaveBeenCalledWith(recipeId, authorId);
+    });
+
+    it("should throw an error if recipeId is missing", async () => {
+      await expect(removeRecipe(null, authorId)).rejects.toThrow(
+        "Missing uuid"
+      );
+      expect(deleteRecipe).not.toHaveBeenCalled();
     });
   });
 });
