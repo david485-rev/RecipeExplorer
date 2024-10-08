@@ -58,6 +58,29 @@ async function queryUserByUsername(username) {
     }
 }
 
+async function queryEmail(email) {
+    const command = new QueryCommand({
+        TableName,
+        IndexName: 'email-index',
+        KeyConditionExpression: '#email = :e',
+        ExpressionAttributeNames: { '#email': 'email' },
+        ExpressionAttributeValues: { ':e': email }
+    });
+
+    try {
+        const data = await documentClient.send(command);
+
+        if (data.Items.length === 0) {
+            return false;
+        }
+
+        return data.Items[0];
+    } catch (err) {
+        logger.error(err);
+        throw new Error(err);
+    }
+}
+
 // update password
 async function patchPassword(item, uuid) {
     const command = new UpdateCommand({
@@ -147,6 +170,7 @@ async function deleteUser(uuid) {
 module.exports = {
     createUser,
     queryUserByUsername,
+    queryEmail,
     postProfile,
     patchPassword,
     deleteUser
