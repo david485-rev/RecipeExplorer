@@ -24,22 +24,22 @@ async function postComment(authorUuid, reqBody) {
     }
     
     const recipe = await getItemByUuid(recipeUuid);
-     
     if(recipe.type !== 'recipe'){
         throw new Error('comment being attached to non-recipe entity');
     }
-    
+    else{
     const newComment = new Comment(authorUuid, recipeUuid, description, rating);
 
     try {
-        const data = await createComment(newComment);
-        if(data.$metadata.httpStatusCode !== 200){
-            throw new Error("database error");
+            const data = await createComment(newComment);
+            if(data.$metadata.httpStatusCode !== 200){
+                throw new Error("database error");
+            }
+            return data;
+        } catch (err) {
+            logger.error(err);
+            throw new Error(err);
         }
-        return data;
-    } catch (err) {
-        logger.error(err);
-        throw new Error(err);
     }
 }
 
@@ -111,9 +111,9 @@ async function removeComment(uuid, authorUuid){
                 userChecked = true;
             }
             else {
-                const recipe = await getItemByUuid(comment.recipeUuid)
+                const recipe = await getItemByUuid(comment.recipeUuid);
                 if (recipe && recipe.type === 'recipe') {
-                    if (recipe.authorUuid === uuid){
+                    if (recipe.authorUuid === authorUuid){
                         userChecked = true;
                     }
                 }
