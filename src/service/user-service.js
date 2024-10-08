@@ -81,6 +81,18 @@ async function passwordChange(item, uuid) {
 }
 
 async function createProfile(item, uuid) {
+    if(!item.username) {
+        throw new Error('missing username');
+    }
+    if(!item.email) {
+        throw new Error('missing email');
+    }
+    const userData = await queryUserByUsername(item.username);
+    const userPersonalData = await getItemByUuid(uuid);
+    if(userData && userPersonalData.username != item.username) {
+        throw new Error('user with username already exists!');
+    }
+
     try{
         let data = await postProfile({
         ...item

@@ -1,6 +1,8 @@
-const { createUser, queryUserByUsername, patchPassword} = require('../src/repository/user-dao');
-const { register, passwordChange } = require('../src/service/user-service');
+const { createUser, queryUserByUsername, patchPassword, postProfile} = require('../src/repository/user-dao');
+const { register, passwordChange, createProfile } = require('../src/service/user-service');
 const { getItemByUuid } = require('../src/repository/general-dao');
+const { getDatabaseItem } = require('../src/service/general-service');
+
 const bcrypt = require("bcrypt");
 
 jest.mock('../src/repository/user-dao', () => {
@@ -11,6 +13,7 @@ jest.mock('../src/repository/user-dao', () => {
         queryUserByUsername: jest.fn(),
         createUser: jest.fn(),
         patchPassword: jest.fn(),
+        postProfile: jest.fn()
     }
 });
 
@@ -110,7 +113,7 @@ describe('User Service, password test', () => {
         }
 
         getItemByUuid.mockReturnValueOnce({
-            password: encyptedPassword
+            password: String(encyptedPassword)
         });
 
         const result = await passwordChange(reqBody);
@@ -120,4 +123,128 @@ describe('User Service, password test', () => {
         expect(getItemByUuid).toHaveBeenCalledTimes(1);
     })
     
+});
+
+describe('User Service, profile test', () => {
+
+    test('get profile should return every information except password and null', async() => {
+        
+        //null description and empty picture
+        //should return as it is except password
+        const token = {
+            uuid: 'validUuid'
+        }
+
+        getItemByUuid.mockReturnValueOnce({
+            uuid: 'ValidUuid',
+            password: 'password',
+            username: 'user1',
+            email: 'user1@email.com',
+            picture: "",
+            description: null,
+
+        });
+
+        const expectResult = {
+            uuid: 'ValidUuid',
+            username: 'user1',
+            email:'user1@email.com',
+            picture: "",
+            description: null,
+        }
+
+        const result = await getDatabaseItem(token.uuid);
+
+        expect(result).toEqual(expectResult);
+        expect(getItemByUuid).toHaveBeenCalledTimes(1);
+
+    });
+
+    test('sucessfully update profile upon providing all require information', async() => {
+        
+        const token = {
+            uuid: "validUuid"
+        }
+
+        const reqBody = {
+            email:"user1@email.com",
+            description: "desciprtion",
+            username: 'user1',
+            picture: "www.picture.com"
+        }
+
+
+    })
+    
+    test('updating profile with empty email should throw error', async()=> {
+        
+        const token = {
+            uuid: "validUuid"
+        }
+
+        const reqBody ={
+            email:"",
+            description: "desciprtion",
+            username: 'user1',
+            picture: "www.picture.com"
+        }
+
+        expect(async() => {
+            await createProfile(reqBody, token.uuid);
+        }).rejects.toThrow('missing email');
+
+    })
+
+    test("updating profile with empty username should throw error", async() => {
+
+        const token = {
+            uuid: "validUuid"
+        }
+
+        const reqBody ={
+            email:"user1.email.com",
+            description: "desciprtion",
+            username: '',
+            picture: "www.picture.com"
+        }
+
+        expect(async() => {
+            await createProfile(reqBody, token.uuid);
+        }).rejects.toThrow('missing username');
+    })
+
+    test("updating profile with already exiting username should throw error", async() => {
+        
+        const token = {
+            uuid: "validUuid"
+        }
+        
+        const reqBody = {
+            email:"user1.email.com",
+            description: "desciprtion",
+            username: 'user1',
+            picture: "www.picture.com"
+        }
+
+        const mockValue = {
+            username:'user1',
+            password:'hashedPasword',
+            description: null,
+            picture: null
+        }
+
+        queryUserByUsername.mockReturnValueOnce(mockValue);
+        getDatabaseItem.mockReturnValueOnce({
+            uuid: "validUuid",
+            username:"user3"
+        })
+
+        expect(async() => {
+            await createProfile(reqBody, token.uuid);
+        }).rejects.toThrow('user with username already exists!');
+        expect(queryUserByUsername).toHaveBeenCalledTimes(1);
+        expect(postProfile).toHaveBeenCalledTimes(1);
+        expect(getDatabaseItem).toHaveBeenCalledTimes(1);
+
+    })
 });
