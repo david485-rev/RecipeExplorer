@@ -3,7 +3,8 @@ const {
     DynamoDBDocumentClient,
     PutCommand,
     ScanCommand,
-    UpdateCommand
+    UpdateCommand,
+    DeleteCommand
 } = require('@aws-sdk/lib-dynamodb');
 require('dotenv').config();
 const AWS_REGION = process.env.AWS_REGION;
@@ -69,11 +70,25 @@ async function updateComment(uuid, description, rating) {
         console.error(err);
         throw new Error(err);
     }
+}
 
+async function deleteComment(uuid){
+    const command = DeleteCommand({
+        TableName,
+        Key:{"uuid": uuid}
+    });
+    try {
+        const data = await documentClient.send(command);
+        return data.Attributes;
+    }catch (err){
+        console.error(err);
+        throw new Error(err);
+    }
 }
 
 module.exports = {
     createComment,
     scanCommentsByRecipeUuid,
-    updateComment
+    updateComment,
+    deleteComment
 }
