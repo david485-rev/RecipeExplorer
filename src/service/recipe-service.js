@@ -9,9 +9,9 @@ const Recipe = require("../model/recipe");
 
 const response = { statusCode: null, data: null };
 
-async function getRecipes() {
+async function getRecipes(queryKey = null, queryVal = null) {
   try {
-    const recipes = await queryRecipes();
+    const recipes = await queryRecipes(queryKey, queryVal);
 
     response.statusCode = recipes.$metadata.httpStatusCode;
     response.data = recipes.Items;
@@ -24,7 +24,7 @@ async function getRecipes() {
 
 async function createRecipe(recipeData, authorId) {
   try {
-    validateId(authorId, "author_id");
+    validateId(authorId, "authorUuid");
 
     const newRecipe = new Recipe(recipeData, authorId);
 
@@ -42,9 +42,9 @@ async function createRecipe(recipeData, authorId) {
 
 async function editRecipe(recipeData, authorId) {
   try {
-    validateId(authorId, "author_id");
+    validateId(authorId, "authorUuid");
 
-    if (authorId != recipeData.author_id) {
+    if (authorId != recipeData.authorUuid) {
       throw new Error("Only the recipe author is allowed to edit this recipe");
     }
 

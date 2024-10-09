@@ -6,7 +6,15 @@ require('dotenv').config();
 const secretKey = process.env.JWT_SECRET;
 const User = require('../model/user');
 const { getItemByUuid } = require('../repository/general-dao')
-const { createUser, queryUserByUsername, queryEmail, postProfile, patchPassword, deleteUser} = require('../repository/user-dao');
+const { createUser, 
+    queryUserByUsername, 
+    queryEmail, 
+    postProfile, 
+    patchPassword, 
+    deleteUser, 
+    queryRecipesByAuthorUuid,
+    queryAllByAuthorUuid 
+} = require('../repository/user-dao');
 
 const saltRounds = 10;
 
@@ -128,6 +136,33 @@ async function removeUser(reqParams) {
 
         return data;
     } catch(err) {
+        logger.error(err);
+        throw new Error(err);
+    }
+}
+
+async function getRecipesByAuthorUuid(uuid){
+    if(!uuid){
+        throw new Error("uuid missing");
+    }
+    try{
+        const data = await queryRecipesByAuthorUuid(uuid);
+        return data;
+    } catch(err) {
+        logger.error(err);
+        throw new Error(err);
+    }
+}
+
+async function getRecipesCommentsByAuthorUuid(uuid) {
+    if (!uuid) {
+        throw new Error("uuid missing");
+    }
+    try {
+        const data = await queryAllByAuthorUuid(uuid);
+        return data;
+    } catch (err) {
+        logger.error(err);
         throw new Error(err);
     }
 }
@@ -137,5 +172,7 @@ module.exports = {
     getUserByUsernamePassword,
     createProfile,
     passwordChange,
-    removeUser
+    removeUser,
+    getRecipesCommentsByAuthorUuid,
+    getRecipesByAuthorUuid
 }
