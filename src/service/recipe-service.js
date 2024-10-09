@@ -65,12 +65,13 @@ async function removeRecipe(recipeId, authorId) {
   try {
     validateId(recipeId, "uuid");
 
+    const recipe = await deleteRecipe(recipeId, authorId);
+
     const commentList = await scanCommentsByRecipeUuid(recipeId);
     commentList.forEach(async (comment) => {
       await deleteComment(comment.uuid);
     })
 
-    const recipe = await deleteRecipe(recipeId, authorId);
     response.statusCode = recipe.$metadata.httpStatusCode;
     response.data = recipe;
     return response;
