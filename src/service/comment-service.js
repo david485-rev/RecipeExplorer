@@ -68,6 +68,9 @@ async function editComment(uuid, authorUuid, reqBody){
     }
     try{
         const { description, rating } = reqBody;
+        if (typeof (rating) !== "number") {
+            throw new Error('rating is not of type number');
+        }
         const oldComment = await getItemByUuid(uuid);
         if(oldComment.type !== "comment"){
             throw new Error("uuid does not point to comment");
