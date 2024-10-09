@@ -163,11 +163,60 @@ async function deleteUser(uuid) {
     }
 }
 
+async function queryRecipesByAuthorUuid(uuid){
+    const command = new QueryCommand({
+        TableName,
+        IndexName: 'authorUuid-index',
+        KeyConditionExpression: '#authorUuid = :authorUuid AND #type = :type',
+        ExpressionAttributeNames: { '#authorUuid': 'authorUuid',
+            '#type':'type'    
+        },
+        ExpressionAttributeValues: { ':authorUuid': uuid,
+            ':type':'recipe'
+        }
+    });
+    try{
+        const data = await documentClient.send(command);
+        if (data.$metadata.httpStatusCode !== 200) {
+            throw new Error("database error");
+        }
+        return data.Items;
+    } catch(err) {
+        logger.error(err);
+        throw new Error(err);
+    }
+}
+async function queryAllByAuthorUuid(uuid) {
+    const command = new QueryCommand({
+        TableName,
+        IndexName: 'authorUuid-index',
+        KeyConditionExpression: '#authorUuid = :authorUuid',
+        ExpressionAttributeNames: {
+            '#authorUuid': 'authorUuid'
+        },
+        ExpressionAttributeValues: {
+            ':authorUuid': uuid
+        }
+    });
+    try {
+        const data = await documentClient.send(command);
+        if (data.$metadata.httpStatusCode !== 200) {
+            throw new Error("database error");
+        }
+        return data.Items;
+    } catch (err) {
+        logger.error(err);
+        throw new Error(err);
+    }
+}
+
 module.exports = {
     createUser,
     queryUserByUsername,
     queryEmail,
     postProfile,
     patchPassword,
-    deleteUser
+    deleteUser,
+    queryRecipesByAuthorUuid,
+    queryAllByAuthorUuid
 }
