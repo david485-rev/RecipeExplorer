@@ -37,8 +37,6 @@ async function queryRecipes(queryKey = null, queryVal = null) {
     commandQuery.ExpressionAttributeValues[":queryVal"] = queryVal;
   }
 
-  console.log(commandQuery);
-
   const command = new QueryCommand(commandQuery);
 
   try {
