@@ -174,7 +174,7 @@ describe("Testing updating a comment via commentService.editComment", () => {
     });
     test("updating a comment with a new rating", async () => {
         const expectedResult = { uuid: "5", rating: 4, description: "hello", recipeUuid: "3", type:"comment", authorUuid:"2" };
-        const reqBody = {rating: 4};
+        const reqBody = { rating: 4, description: "hello" };
         const comment = { uuid: "5", rating: 2, description: "hello", recipeUuid: "3", type: "comment", authorUuid: "2" };
         const authorUuid = "2";
         const uuid = "5"
@@ -191,7 +191,7 @@ describe("Testing updating a comment via commentService.editComment", () => {
 
     test("updating a comment with a new description", async () => {
         const expectedResult = { uuid: "5", rating: 4, description: "hello comment", recipeUuid: "3", type: "comment", authorUuid: "2" };
-        const reqBody = { description: "hello comment" };
+        const reqBody = { rating: 4, description: "hello comment" };
         const comment = { uuid: "5", rating: 2, description: "hello", recipeUuid: "3", type: "comment", authorUuid: "2" };
         const authorUuid = "2";
         const uuid = "5"
@@ -206,8 +206,8 @@ describe("Testing updating a comment via commentService.editComment", () => {
         expect(updateComment).toHaveBeenCalled();
     });
 
-    test("updating a comment with a no changes", async () => {
-        const expectedError = "no changes have been made";
+    test("updating a comment with a no values", async () => {
+        const expectedError = "Error: missing rating or description";
         const reqBody = { };
         const comment = { uuid: "5", rating: 2, description: "hello", recipeUuid: "3", type: "comment", authorUuid: "2" };
         const authorUuid = "2";
@@ -218,13 +218,13 @@ describe("Testing updating a comment via commentService.editComment", () => {
         expect(async () => {
             await commentService.editComment(uuid, authorUuid, reqBody);
         }).rejects.toThrow(expectedError);
-        expect(getItemByUuid).toHaveBeenCalled();
+        expect(getItemByUuid).not.toHaveBeenCalled();
         expect(updateComment).not.toHaveBeenCalled();
     });
 
     test("updating a comment with no authorId", async () => {
         const expectedError = "missing authorUuid";
-        const reqBody = { description: "hello2" };
+        const reqBody = { description: "hello2", rating: 3 };
         const authorUuid = null;
         const uuid = "5"
     
@@ -237,7 +237,7 @@ describe("Testing updating a comment via commentService.editComment", () => {
 
     test("updating a comment with no uuid", async () => {
         const expectedError = "missing uuid";
-        const reqBody = { description: "hello2" };
+        const reqBody = { description: "hello2", rating: 3 };
         const authorUuid = "2";
         const uuid = null;
 
@@ -251,7 +251,7 @@ describe("Testing updating a comment via commentService.editComment", () => {
     
     test("updating a comment with invalid authorId", async () => {
         const expectedError = "Forbidden Access";
-        const reqBody = { description: "hello2" };
+        const reqBody = { description: "hello2", rating: 2 };
         const comment = { uuid: "5", rating: 2, description: "hello", recipeUuid: "3", type: "comment", authorUuid: "2" };
         const authorUuid = "6";
         const uuid = "5";
@@ -267,7 +267,7 @@ describe("Testing updating a comment via commentService.editComment", () => {
     
     test("updating a item that is not a comment", async () => {
         const expectedError = "uuid does not point to comment";
-        const reqBody = { description: "hello2" };
+        const reqBody = { description: "hello2", rating: 3 };
         const comment = { uuid: "5", rating: 2, description: "hello", type: "recipe", authorUuid: "2" };
         const authorUuid = "2";
         const uuid = "5";
