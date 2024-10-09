@@ -75,6 +75,7 @@ async function updateRecipe(Recipe) {
     UpdateExpression:
       "Set #recipeThumb = :recipeThumb, #recipeName = :recipeName, #category = :category, #cuisine = :cuisine, #description = :description, #ingredients = :ingredients, #instructions = :instructions",
     ExpressionAttributeNames: {
+      "#uuid": "uuid",
       "#recipeThumb": "recipeThumb",
       "#recipeName": "recipeName",
       "#category": "category",
@@ -92,7 +93,7 @@ async function updateRecipe(Recipe) {
       ":ingredients": Recipe.ingredients,
       ":instructions": Recipe.instructions
     },
-    ConditionExpression: "attribute_exists(uuid)",
+    ConditionExpression: "attribute_exists(#uuid)",
     ReturnValues: "ALL_NEW"
   });
   try {
@@ -121,6 +122,9 @@ async function deleteRecipe(recipeId, authorId) {
     logger.info(`Deleted recipe: ${response}`);
     return response;
   } catch (err) {
+    if (err instanceof ConditionalCheckFailedException) {
+      throw new Error("Author uuid is not valid or does not exist");
+    }
     logger.error(err);
     throw new Error(err);
   }
