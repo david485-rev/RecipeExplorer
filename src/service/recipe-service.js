@@ -5,6 +5,7 @@ const {
   updateRecipe,
   deleteRecipe
 } = require("../repository/recipe-dao");
+const { getDatabaseItem } = require("../service/general-service");
 const Recipe = require("../model/recipe");
 
 const response = { statusCode: null, data: null };
@@ -42,12 +43,7 @@ async function createRecipe(recipeData, authorId) {
 
 async function editRecipe(recipeData, authorId) {
   try {
-    validateId(authorId, "authorUuid");
-
-    if (authorId != recipeData.authorUuid) {
-      throw new Error("Only the recipe author is allowed to edit this recipe");
-    }
-
+    await validateAuthor(recipeData.uuid, authorId);
     dataValidation(recipeData);
 
     const recipe = await updateRecipe(recipeData);
@@ -77,6 +73,13 @@ async function removeRecipe(recipeId, authorId) {
 function validateId(id, attr) {
   if (!id) {
     throw new Error(`Missing ${attr}`);
+  }
+}
+
+async function validateAuthor(uuid, authorId) {
+  const recipe = await getDatabaseItem(uuid);
+  if (recipe.authorUuid != authorId) {
+    throw new Error("Only the recipe author is allowed to edit this recipe");
   }
 }
 
