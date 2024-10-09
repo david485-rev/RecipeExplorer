@@ -22,12 +22,12 @@ async function postComment(authorUuid, reqBody) {
     if (!rating) {
         throw new Error('missing rating');
     }
-    if(typeof(rating) !== "number"){
+    if (typeof (rating) !== "number" && !(rating >= 1) && !(rating <= 10)){
         throw new Error('rating is not of type number');
     }
     
     const recipe = await getItemByUuid(recipeUuid);
-    if (recipe.type !== 'recipe' && !(rating >= 1) && !(rating <= 10)){
+    if (recipe.type !== 'recipe'){
         throw new Error('comment being attached to non-recipe entity');
     }
     else{
