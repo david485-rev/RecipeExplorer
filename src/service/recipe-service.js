@@ -9,9 +9,9 @@ const Recipe = require("../model/recipe");
 
 const response = { statusCode: null, data: null };
 
-async function getRecipes() {
+async function getRecipes(queryKey = null, queryVal = null) {
   try {
-    const recipes = await queryRecipes();
+    const recipes = await queryRecipes(queryKey, queryVal);
 
     response.statusCode = recipes.$metadata.httpStatusCode;
     response.data = recipes.Items;
