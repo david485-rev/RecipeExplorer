@@ -84,7 +84,7 @@ async function editComment(uuid, authorUuid, reqBody){
             changes = true;
         }
         if(changes){
-            const newComment = await updateComment(uuid, oldComment.creation_date, newDescription, newRating);
+            const newComment = await updateComment(uuid, newDescription, newRating);
             return newComment;
         }
         else{

@@ -192,7 +192,7 @@ describe('User Service Tests', () => {
             password: 'david',
             username: 'david123',
             email: 'david@gmail.com',
-            creation_date: 1726686455,
+            creationDate: 1726686455,
             employee_id: '52caac7a-e48f-4587-9eac-c87422f4ba89'
         });
 
