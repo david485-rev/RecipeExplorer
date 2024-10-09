@@ -41,10 +41,10 @@ router.post('/register', async function (req, res, next) {
 })
 
 
-router.get("/profile", authenticateToken, async (req, res) => {
-    const user = req.user;
+router.get("/profile/:uuid", authenticateToken, async (req, res) => {
+    const user = req.params.uuid;
     try {
-        const data = await getDatabaseItem(user.uuid);
+        const data = await getDatabaseItem(user);
         res.status(200).json(data);
     } catch (err) {
         logger.error(err.message);

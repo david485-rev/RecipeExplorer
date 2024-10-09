@@ -77,7 +77,7 @@ async function passwordChange(item, uuid) {
     try{
         if(await bcrypt.compare(item.password, user.password)){
             let cryptPassword = await bcrypt.hash(item.newPassword, saltRounds);
-            let data = patchPassword(cryptPassword, uuid);
+            let data = await patchPassword(cryptPassword, uuid);
             return data; 
         } else throw new Error("password is not correct")
     }catch(err){
