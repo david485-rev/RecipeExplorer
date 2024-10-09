@@ -41,7 +41,7 @@ router.post('/register', async function (req, res, next) {
 })
 
 
-router.get("/profile/:uuid", authenticateToken, async (req, res) => {
+router.get("/profile/:uuid", async (req, res) => {
     const user = req.params.uuid;
     try {
         const data = await getDatabaseItem(user);
