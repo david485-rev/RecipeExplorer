@@ -4,7 +4,8 @@ const { authenticateToken } = require('../util/authentication.js')
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const { getUserByUsernamePassword, 
-    register, createProfile, 
+    register, 
+    createProfile, 
     passwordChange, 
     removeUser, 
     getRecipesCommentsByAuthorUuid,
