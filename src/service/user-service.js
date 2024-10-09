@@ -6,7 +6,15 @@ require('dotenv').config();
 const secretKey = process.env.JWT_SECRET;
 const User = require('../model/user');
 const { getItemByUuid } = require('../repository/general-dao')
-const { createUser, queryUserByUsername, queryEmail, postProfile, patchPassword, deleteUser} = require('../repository/user-dao');
+const { createUser, 
+    queryUserByUsername, 
+    queryEmail, 
+    postProfile, 
+    patchPassword, 
+    deleteUser, 
+    queryRecipesByAuthorUuid,
+    queryAllByAuthorUuid 
+} = require('../repository/user-dao');
 
 const saltRounds = 10;
 
@@ -138,8 +146,7 @@ async function getRecipesByAuthorUuid(uuid){
         throw new Error("uuid missing");
     }
     try{
-        const data = null;
-        //replace with dao call
+        const data = queryRecipesByAuthorUuid(uuid);
         return data;
     } catch(err) {
         logger.error(err);
@@ -152,8 +159,7 @@ async function getRecipesCommentsByAuthorUuid(uuid) {
         throw new Error("uuid missing");
     }
     try {
-        const data = null;
-        //replace with dao call
+        const data = queryAllByAuthorUuid(uuid);
         return data;
     } catch (err) {
         logger.error(err);

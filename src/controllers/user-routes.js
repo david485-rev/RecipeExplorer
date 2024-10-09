@@ -94,9 +94,9 @@ router.delete("/:uuid", async function(req, res, next) {
     }
 });
 
-router.get("/recipes", async (req, res) => {
+router.get("/recipes/:uuid", async (req, res) => {
     try {
-        const userUuid = req.user.uuid;
+        const uuid = req.params.uuid;
         const data = getRecipesByAuthorUuid(uuid);
         res.status(200).json(data);
     }
@@ -107,9 +107,9 @@ router.get("/recipes", async (req, res) => {
     }
 });
 
-router.get("/activity", async (req, res) => {
+router.get("/activity/:uuid", async (req, res) => {
     try {
-        const userUuid = req.user.uuid;
+        const uuid = req.params.uuid;
         const data = getRecipesCommentsByAuthorUuid(uuid);
         res.status(200).json(data);
     }
