@@ -15,8 +15,8 @@ const docClient = DynamoDBDocumentClient.from(client);
 
 const TableName = "RecipeExplorer";
 
-async function queryRecipes() {
-  const command = new QueryCommand({
+async function queryRecipes(queryKey = null, queryVal = null) {
+  const commandQuery = {
     TableName,
     IndexName: "type-index",
     KeyConditionExpression: "#type = :type",
@@ -26,7 +26,19 @@ async function queryRecipes() {
     ExpressionAttributeValues: {
       ":type": "recipe"
     }
-  });
+  };
+
+  if (queryKey && queryVal) {
+    commandQuery.FilterExpression =
+      queryKey === "ingredients"
+        ? "contains(#queryKey, :queryVal)"
+        : "#queryKey = :queryVal";
+    commandQuery.ExpressionAttributeNames["#queryKey"] = queryKey;
+    commandQuery.ExpressionAttributeValues[":queryVal"] = queryVal;
+  }
+
+  const command = new QueryCommand(commandQuery);
+
   try {
     const response = await docClient.send(command);
     logger.info("Queried recipes");

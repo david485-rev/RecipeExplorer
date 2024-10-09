@@ -8,8 +8,8 @@ class Recipe {
     this.recipeThumb = recipeData.recipeThumb;
     this.recipeName = recipeData.recipeName;
     this.type = "recipe";
-    this.category = recipeData.category;
-    this.cuisine = recipeData.cuisine;
+    this.category = recipeData.category.toLowerCase();
+    this.cuisine = recipeData.cuisine.toLowerCase();
     this.description = recipeData.description;
     this.ingredients = recipeData.ingredients;
     this.instructions = recipeData.instructions;
