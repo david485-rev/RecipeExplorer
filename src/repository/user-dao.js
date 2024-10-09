@@ -167,7 +167,8 @@ async function queryRecipesByAuthorUuid(uuid){
     const command = new QueryCommand({
         TableName,
         IndexName: 'authorUuid-index',
-        KeyConditionExpression: '#authorUuid = :authorUuid AND #type = :type',
+        KeyConditionExpression: '#authorUuid = :authorUuid',
+        FilterExpression: '#type = :type',
         ExpressionAttributeNames: { '#authorUuid': 'authorUuid',
             '#type':'type'    
         },

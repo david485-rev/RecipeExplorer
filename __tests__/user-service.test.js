@@ -1,5 +1,5 @@
-const { createUser, queryUserByUsername, patchPassword, postProfile, queryEmail} = require('../src/repository/user-dao');
-const { register, passwordChange, createProfile,getUserByUsernamePassword  } = require('../src/service/user-service');
+const { createUser, queryUserByUsername, patchPassword, postProfile, queryEmail, queryRecipesByAuthorUuid, queryAllByAuthorUuid } = require('../src/repository/user-dao');
+const { register, passwordChange, createProfile, getUserByUsernamePassword, getRecipesByAuthorUuid, getRecipesCommentsByAuthorUuid } = require('../src/service/user-service');
 const { getItemByUuid } = require('../src/repository/general-dao');
 const { getDatabaseItem } = require('../src/service/general-service');
 
@@ -14,15 +14,18 @@ jest.mock('../src/repository/user-dao', () => {
         queryEmail: jest.fn(),
         createUser: jest.fn(),
         patchPassword: jest.fn(),
-        postProfile: jest.fn()
+        postProfile: jest.fn(),
+        queryRecipesByAuthorUuid: jest.fn(),
+        queryAllByAuthorUuid: jest.fn()
     }
 });
+
 
 jest.mock('../src/repository/general-dao', () => {
     const originalModule = jest.requireActual('../src/repository/general-dao');
 
     return {
-        ...origin,
+        ...original,
         getDatabaseItem: jest.fn()
     }
 })
@@ -488,5 +491,123 @@ describe('User Service Tests', () => {
         }).rejects.toThrow('this email already exist');
         expect(queryEmail).toHaveBeenCalledTimes(1);
         expect(getDatabaseItem).toHaveBeenCalledTimes(1);
+    });
+});
+
+describe("Testing getting a users recipes via user-service.getRecipesByAuthorUuid", () => {
+    afterEach(() => {
+        queryRecipesByAuthorUuid.mockClear();
+        queryRecipesByAuthorUuid.mockReset();
+    });
+
+    test("getting a list of recipes by authorUuid", async () => {
+        const expectedResult = [{ uuid: "7", authorUuid: "5", type: "recipe" }, 
+            { uuid: "8", authorUuid: "5", type: "recipe" }];
+        const uuid = "5"
+        let result = null;
+        queryRecipesByAuthorUuid.mockReturnValueOnce(expectedResult);
+        
+        result = await getRecipesByAuthorUuid(uuid);
+
+        expect(result).toEqual(expectedResult);
+        expect(queryRecipesByAuthorUuid).toHaveBeenCalled();
+    });
+
+    test("getting a list of recipes by authorUuid no recipes", async () => {
+        const expectedResult = [];
+        const uuid = "5"
+        let result = null;
+        queryRecipesByAuthorUuid.mockReturnValueOnce(expectedResult);
+
+        result = await getRecipesByAuthorUuid(uuid);
+
+        expect(result).toEqual(expectedResult);
+        expect(queryRecipesByAuthorUuid).toHaveBeenCalled();
+    });
+
+    test("getting a list of recipes by authorUuid bad database return", async () => {
+        const expectedError = 'database error';
+        const uuid = "5"
+
+        queryRecipesByAuthorUuid.mockImplementation(() => {
+            throw new Error(expectedError);
+        });
+
+        expect(async () => {
+            await getRecipesByAuthorUuid(uuid)
+        }).rejects.toThrow(expectedError);
+    });
+
+    test("getting a list of recipes by authorUuid no authorUuid", async () => {
+        const expectedError = 'uuid missing';
+        const expectedResult = [];
+        const uuid = null
+
+        queryRecipesByAuthorUuid.mockReturnValueOnce(expectedResult);
+
+        expect(async () => {
+            await getRecipesByAuthorUuid(uuid)
+        }).rejects.toThrow(expectedError);
+        expect(queryRecipesByAuthorUuid).not.toHaveBeenCalled();
+    });
+});
+describe("Testing getting a users recipes via user-service.getRecipesByAuthorUuid", () => {
+    afterEach(() => {
+        queryAllByAuthorUuid.mockClear();
+        queryAllByAuthorUuid.mockReset();
+    });
+
+    test("getting a list of recipes and comments by authorUuid", async () => {
+        const expectedResult = [{ uuid: "7", authorUuid: "5", type: "recipe" }, 
+            { uuid: "8", authorUuid: "5", type: "recipe" }, 
+            { uuid: "12", authorUuid: "5", type: "comment" }];
+        const uuid = "5"
+        let result = null;
+        queryAllByAuthorUuid.mockReturnValueOnce(expectedResult);
+
+        result = await getRecipesCommentsByAuthorUuid(uuid);
+
+        expect(result).toEqual(expectedResult);
+        expect(queryAllByAuthorUuid).toHaveBeenCalled();
+        
+    });
+
+    test("getting a list of recipes and comments by authorUuid no posts", async () => {
+        const expectedResult = [];
+        const uuid = "5"
+        let result = null;
+        queryAllByAuthorUuid.mockReturnValueOnce(expectedResult);
+
+        result = await getRecipesCommentsByAuthorUuid(uuid);
+
+        expect(result).toEqual(expectedResult);
+        expect(queryAllByAuthorUuid).toHaveBeenCalled();
+
+    });
+
+    test("getting a list of recipes and comments by authorUuid bad database return", async () => {
+        const expectedError = 'database error';
+        const uuid = "5"
+        
+        queryAllByAuthorUuid.mockImplementation(() => {
+            throw new Error(expectedError);
+        });
+
+        expect(async () => {
+            await getRecipesCommentsByAuthorUuid(uuid)
+        }).rejects.toThrow(expectedError);
+    });
+    
+    test("getting a list of recipes and comments by authorUuid no authorUuid", async () => {
+        const expectedError = 'uuid missing';
+        const expectedResult = [];
+        const uuid = null
+
+        queryAllByAuthorUuid.mockReturnValueOnce(expectedResult);
+
+        expect(async () => {
+            await getRecipesCommentsByAuthorUuid(uuid)
+        }).rejects.toThrow(expectedError);
+        expect(queryAllByAuthorUuid).not.toHaveBeenCalled();
     });
 });
