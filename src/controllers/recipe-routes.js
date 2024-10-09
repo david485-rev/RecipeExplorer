@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { logger } = require("../util/logger.js");
+const { validateQuery } = require("../util/query_validation.js");
 const { authenticateToken } = require("../util/authentication.js");
 const { getDatabaseItem } = require("../service/general-service");
 const {
@@ -10,11 +11,11 @@ const {
   removeRecipe
 } = require("../service/recipe-service");
 
-router.get("/", async (req, res) => {
+router.get("/", validateQuery, async (req, res) => {
   try {
     const queryKeys = Object.keys(req.query);
-    const queryKey = queryKeys[0] ?? null;
-    const queryVal = queryKey ? req.query[queryKey] : null;
+    const queryKey = queryKeys[0] || null;
+    const queryVal = req.query[queryKey] || null;
 
     const response = await getRecipes(queryKey, queryVal);
 
