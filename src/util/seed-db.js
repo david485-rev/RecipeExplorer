@@ -14,7 +14,7 @@ const MAX_COMMENTS = 5;
  * This function creates fake users that look like this:
  *  {
     uuid: 'b206d4a8-fd8e-4b3c-94ac-a7b9b244b400',
-    creation_date: 1727980920,
+    creationDate: 1727980920,
     type: 'user',
     username: 'test-user(0 to MAX_USERS - 1)',
     password: 'test-password(0 to MAX_USERS - 1)',
@@ -44,8 +44,8 @@ async function createFakeRecipes() {
         }
 
         const recipe_data = {
-            recipe_thumb: "some link",
-            recipe_name: `test-recipe${count}`,
+            recipeThumb: "some link",
+            recipeName: `test-recipe${count}`,
             type: "recipe",
             category: "test-category",
             cuisine: MOCK_DATA.cuisine[Math.floor(Math.random() * MOCK_DATA.cuisine.length)],
@@ -64,7 +64,7 @@ async function createFakeRecipes() {
  * This function creates fake comments that look like this:
  *  {
     uuid: 'bc8b6edc-8df9-4b6a-b08e-bce3f85e94d1',
-    creation_date: 1728053702,
+    creationDate: 1728053702,
     authorUuid: '32262434-2ebf-46ca-8e8c-a2d3ccc063c1',
     recipeUuid: '87b24bf5-9c7e-4742-a843-15338a4ebe2a',
     description: "My uncle asked me for the recipe, that's how you know it's good!",
