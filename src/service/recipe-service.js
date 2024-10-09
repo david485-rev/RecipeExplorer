@@ -45,10 +45,7 @@ async function editRecipe(recipeData, authorId) {
     validateId(authorId, "author_id");
 
     if (authorId != recipeData.author_id) {
-      response.statusCode = 403;
-      response.message =
-        "Only the recipe author is allowed to edit this recipe";
-      return response;
+      throw new Error("Only the recipe author is allowed to edit this recipe");
     }
 
     dataValidation(recipeData);
