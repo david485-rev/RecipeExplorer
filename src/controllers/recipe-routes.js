@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { logger } = require("winston");
+const { logger } = require("../util/logger.js");
 const { authenticateToken } = require("../util/authentication.js");
 const { getDatabaseItem } = require("../service/general-service");
 const {
@@ -12,7 +12,12 @@ const {
 
 router.get("/", async (req, res) => {
   try {
-    const response = await getRecipes();
+    const queryKeys = Object.keys(req.query);
+    const queryKey = queryKeys[0] ?? null;
+    const queryVal = queryKey ? req.query[queryKey] : null;
+
+    const response = await getRecipes(queryKey, queryVal);
+
     res.status(response.statusCode);
     res.send(response.data);
   } catch (err) {
