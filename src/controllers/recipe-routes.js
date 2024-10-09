@@ -30,8 +30,8 @@ router.get("/", validateQuery, async (req, res) => {
 router.get("/:uuid", async (req, res) => {
   try {
     const response = await getDatabaseItem(req.params.uuid);
-    if (response.username) {
-      throw new Error("Can only get by recipe's uuid");
+    if (response.type != "recipe") {
+      throw new Error("No recipe exists by that uuid");
     }
 
     res.status(200).send(response);
