@@ -68,6 +68,9 @@ async function editComment(uuid, authorUuid, reqBody){
     }
     try{
         const { description, rating } = reqBody;
+        if (!rating || !description) {
+            throw new Error("missing rating or description")
+        }
         if (typeof (rating) !== "number" && !(rating >= 1) && !(rating <= 10)) {
             throw new Error('rating is not in scope');
         }
@@ -78,24 +81,8 @@ async function editComment(uuid, authorUuid, reqBody){
         if(oldComment.authorUuid !== authorUuid){
             throw new Error("Forbidden Access");
         }
-        let changes = false;
-        let newDescription = oldComment.description;
-        if (description != null && newDescription !== description){
-            newDescription = description;
-            changes = true;
-        }
-        let newRating = oldComment.rating;
-        if (rating != null && newRating !== rating){
-            newRating = rating;
-            changes = true;
-        }
-        if(changes){
-            const newComment = await updateComment(uuid, oldComment.creation_date, newDescription, newRating);
-            return newComment;
-        }
-        else{
-            throw new Error("no changes have been made")
-        }
+        const newComment = await updateComment(uuid, oldComment.creation_date, description, rating);
+        return newComment;
     }catch(err){
         logger.error(err);
         throw new Error(err);
