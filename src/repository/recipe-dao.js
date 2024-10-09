@@ -1,4 +1,7 @@
-const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
+const {
+  DynamoDBClient,
+  ConditionalCheckFailedException
+} = require("@aws-sdk/client-dynamodb");
 const {
   DynamoDBDocumentClient,
   PutCommand,
@@ -89,6 +92,7 @@ async function updateRecipe(Recipe) {
       ":ingredients": Recipe.ingredients,
       ":instructions": Recipe.instructions
     },
+    ConditionExpression: "attribute_exists(uuid)",
     ReturnValues: "ALL_NEW"
   });
   try {
@@ -96,6 +100,9 @@ async function updateRecipe(Recipe) {
     logger.info(`Updated recipe: ${response}`);
     return response;
   } catch (err) {
+    if (err instanceof ConditionalCheckFailedException) {
+      throw new Error("The recipe does not exist");
+    }
     logger.error(err);
     throw new Error(err);
   }
