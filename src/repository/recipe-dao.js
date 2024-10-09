@@ -34,7 +34,8 @@ async function queryRecipes(queryKey = null, queryVal = null) {
         ? "contains(#queryKey, :queryVal)"
         : "#queryKey = :queryVal";
     commandQuery.ExpressionAttributeNames["#queryKey"] = queryKey;
-    commandQuery.ExpressionAttributeValues[":queryVal"] = queryVal;
+    commandQuery.ExpressionAttributeValues[":queryVal"] =
+      queryVal.toLowerCase();
   }
 
   const command = new QueryCommand(commandQuery);

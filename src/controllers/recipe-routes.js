@@ -17,7 +17,7 @@ router.get("/", validateQuery, async (req, res) => {
     const queryKey = queryKeys[0] || null;
     const queryVal = req.query[queryKey] || null;
 
-    const response = await getRecipes(queryKey, queryVal.toLowerCase());
+    const response = await getRecipes(queryKey, queryVal);
 
     res.status(response.statusCode);
     res.send(response.data);
@@ -30,7 +30,10 @@ router.get("/", validateQuery, async (req, res) => {
 router.get("/:uuid", async (req, res) => {
   try {
     const response = await getDatabaseItem(req.params.uuid);
-    // res.status(response.$metadata.httpStatusCode);
+    if (response.type != "recipe") {
+      throw new Error("No recipe exists by that uuid");
+    }
+
     res.status(200).send(response);
   } catch (err) {
     logger.error(err.message);
