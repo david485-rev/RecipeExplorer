@@ -3,7 +3,13 @@ const { logger } = require('../util/logger.js');
 const { authenticateToken } = require('../util/authentication.js')
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const { getUserByUsernamePassword, register, createProfile, passwordChange, removeUser } = require('../service/user-service.js');
+const { getUserByUsernamePassword, 
+    register, createProfile, 
+    passwordChange, 
+    removeUser, 
+    getRecipesCommentsByAuthorUuid,
+    getRecipesByAuthorUuid
+} = require('../service/user-service.js');
 const { getDatabaseItem } = require('../service/general-service.js');
 require('dotenv').config();
 const secretKey = process.env.JWT_SECRET;;
@@ -84,6 +90,32 @@ router.delete("/:uuid", async function(req, res, next) {
     } catch(err) {
         logger.error(err.message);
         res.status(400).json({ message: err.message});
+        return;
+    }
+});
+
+router.get("/recipes", async (req, res) => {
+    try {
+        const userUuid = req.user.uuid;
+        const data = getRecipesByAuthorUuid(uuid);
+        res.status(200).json(data);
+    }
+    catch (err) {
+        logger.error(err.message);
+        res.status(400).json({ message: err.message });
+        return;
+    }
+});
+
+router.get("/activity", async (req, res) => {
+    try {
+        const userUuid = req.user.uuid;
+        const data = getRecipesCommentsByAuthorUuid(uuid);
+        res.status(200).json(data);
+    }
+    catch (err) {
+        logger.error(err.message);
+        res.status(400).json({ message: err.message });
         return;
     }
 });

@@ -128,6 +128,35 @@ async function removeUser(reqParams) {
 
         return data;
     } catch(err) {
+        logger.error(err);
+        throw new Error(err);
+    }
+}
+
+async function getRecipesByAuthorUuid(uuid){
+    if(!uuid){
+        throw new Error("uuid missing");
+    }
+    try{
+        const data = null;
+        //replace with dao call
+        return data;
+    } catch(err) {
+        logger.error(err);
+        throw new Error(err);
+    }
+}
+
+async function getRecipesCommentsByAuthorUuid(uuid) {
+    if (!uuid) {
+        throw new Error("uuid missing");
+    }
+    try {
+        const data = null;
+        //replace with dao call
+        return data;
+    } catch (err) {
+        logger.error(err);
         throw new Error(err);
     }
 }
@@ -137,5 +166,7 @@ module.exports = {
     getUserByUsernamePassword,
     createProfile,
     passwordChange,
-    removeUser
+    removeUser,
+    getRecipesCommentsByAuthorUuid,
+    getRecipesByAuthorUuid
 }
