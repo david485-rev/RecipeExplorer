@@ -17,7 +17,7 @@ router.get("/", validateQuery, async (req, res) => {
     const queryKey = queryKeys[0] || null;
     const queryVal = req.query[queryKey] || null;
 
-    const response = await getRecipes(queryKey, queryVal);
+    const response = await getRecipes(queryKey, queryVal.toLowerCase());
 
     res.status(response.statusCode);
     res.send(response.data);
@@ -30,8 +30,8 @@ router.get("/", validateQuery, async (req, res) => {
 router.get("/:uuid", async (req, res) => {
   try {
     const response = await getDatabaseItem(req.params.uuid);
-    res.status(response.$metadata.httpStatusCode);
-    res.send(response.Item);
+    // res.status(response.$metadata.httpStatusCode);
+    res.status(200).send(response);
   } catch (err) {
     logger.error(err.message);
     res.status(400).send({ message: err.message });

@@ -146,7 +146,7 @@ async function getRecipesByAuthorUuid(uuid){
         throw new Error("uuid missing");
     }
     try{
-        const data = queryRecipesByAuthorUuid(uuid);
+        const data = await queryRecipesByAuthorUuid(uuid);
         return data;
     } catch(err) {
         logger.error(err);
@@ -159,7 +159,7 @@ async function getRecipesCommentsByAuthorUuid(uuid) {
         throw new Error("uuid missing");
     }
     try {
-        const data = queryAllByAuthorUuid(uuid);
+        const data = await queryAllByAuthorUuid(uuid);
         return data;
     } catch (err) {
         logger.error(err);

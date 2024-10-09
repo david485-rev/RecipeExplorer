@@ -73,7 +73,7 @@ async function updateComment(uuid, description, rating) {
 }
 
 async function deleteComment(uuid){
-    const command = DeleteCommand({
+    const command = new DeleteCommand({
         TableName,
         Key:{"uuid": uuid}
     });

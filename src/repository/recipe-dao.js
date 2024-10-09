@@ -69,9 +69,9 @@ async function updateRecipe(Recipe) {
     TableName,
     Key: { uuid: Recipe.uuid },
     UpdateExpression:
-      "Set #recipe_thumb = :recipe_thumb, #recipeName = :recipeName, #category = :category, #cuisine = :cuisine, #description = :description, #ingredients = :ingredients, #instructions = :instructions",
+      "Set #recipeThumb = :recipeThumb, #recipeName = :recipeName, #category = :category, #cuisine = :cuisine, #description = :description, #ingredients = :ingredients, #instructions = :instructions",
     ExpressionAttributeNames: {
-      "#recipe_thumb": "recipe_thumb",
+      "#recipeThumb": "recipeThumb",
       "#recipeName": "recipeName",
       "#category": "category",
       "#cuisine": "cuisine",
@@ -80,7 +80,7 @@ async function updateRecipe(Recipe) {
       "#instructions": "instructions"
     },
     ExpressionAttributeValues: {
-      ":recipe_thumb": Recipe.recipe_thumb,
+      ":recipeThumb": Recipe.recipeThumb,
       ":recipeName": Recipe.recipeName,
       ":category": Recipe.category,
       ":cuisine": Recipe.cuisine,

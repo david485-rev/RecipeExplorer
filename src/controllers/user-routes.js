@@ -98,7 +98,7 @@ router.delete("/:uuid", async function(req, res, next) {
 router.get("/recipes/:uuid", async (req, res) => {
     try {
         const uuid = req.params.uuid;
-        const data = getRecipesByAuthorUuid(uuid);
+        const data = await getRecipesByAuthorUuid(uuid);
         res.status(200).json(data);
     }
     catch (err) {
@@ -111,7 +111,7 @@ router.get("/recipes/:uuid", async (req, res) => {
 router.get("/activity/:uuid", async (req, res) => {
     try {
         const uuid = req.params.uuid;
-        const data = getRecipesCommentsByAuthorUuid(uuid);
+        const data = await getRecipesCommentsByAuthorUuid(uuid);
         res.status(200).json(data);
     }
     catch (err) {
