@@ -81,7 +81,7 @@ async function editComment(uuid, authorUuid, reqBody){
         if(oldComment.authorUuid !== authorUuid){
             throw new Error("Forbidden Access");
         }
-        const newComment = await updateComment(uuid, oldComment.creation_date, description, rating);
+        const newComment = await updateComment(uuid, description, rating);
         return newComment;
     }catch(err){
         logger.error(err);

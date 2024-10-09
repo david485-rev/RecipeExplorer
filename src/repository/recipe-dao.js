@@ -57,10 +57,10 @@ async function updateRecipe(Recipe) {
     TableName,
     Key: { uuid: Recipe.uuid },
     UpdateExpression:
-      "Set #recipe_thumb = :recipe_thumb, #recipe_name = :recipe_name, #category = :category, #cuisine = :cuisine, #description = :description, #ingredients = :ingredients, #instructions = :instructions",
+      "Set #recipe_thumb = :recipe_thumb, #recipeName = :recipeName, #category = :category, #cuisine = :cuisine, #description = :description, #ingredients = :ingredients, #instructions = :instructions",
     ExpressionAttributeNames: {
       "#recipe_thumb": "recipe_thumb",
-      "#recipe_name": "recipe_name",
+      "#recipeName": "recipeName",
       "#category": "category",
       "#cuisine": "cuisine",
       "#description": "description",
@@ -69,7 +69,7 @@ async function updateRecipe(Recipe) {
     },
     ExpressionAttributeValues: {
       ":recipe_thumb": Recipe.recipe_thumb,
-      ":recipe_name": Recipe.recipe_name,
+      ":recipeName": Recipe.recipeName,
       ":category": Recipe.category,
       ":cuisine": Recipe.cuisine,
       ":description": Recipe.description,
@@ -92,8 +92,8 @@ async function deleteRecipe(recipeId, authorId) {
   const command = new DeleteCommand({
     TableName,
     Key: { uuid: recipeId },
-    ConditionExpression: "#author_id = :authorId",
-    ExpressionAttributeNames: { "#author_id": "author_id" },
+    ConditionExpression: "#authorUuid = :authorId",
+    ExpressionAttributeNames: { "#authorUuid": "authorUuid" },
     ExpressionAttributeValues: { ":authorId": authorId }
   });
   try {

@@ -53,9 +53,9 @@ describe("Recipe Service", () => {
       const authorId = "12345";
 
       const recipeData = {
-        author_id: authorId,
-        recipe_thumb: "image_url",
-        recipe_name: "New Recipe",
+        authorUuid: authorId,
+        recipeThumb: "image_url",
+        recipeName: "New Recipe",
         type: "recipe",
         category: "sweets",
         cuisine: "French",
@@ -69,10 +69,10 @@ describe("Recipe Service", () => {
       const mockResponse = {
         $metadata: { httpStatusCode: 201 },
         uuid: "test-uuid",
-        author_id: authorId,
-        creation_date: newRecipe.creation_date,
-        recipe_thumb: recipeData.recipe_thumb,
-        recipe_name: recipeData.recipe_name,
+        authorUuid: authorId,
+        creationDate: newRecipe.creationDate,
+        recipeThumb: recipeData.recipeThumb,
+        recipeName: recipeData.recipeName,
         type: recipeData.type,
         category: recipeData.category,
         cuisine: recipeData.cuisine,
@@ -94,9 +94,9 @@ describe("Recipe Service", () => {
       const authorId = "12345";
 
       const invalidData = {
-        author_id: authorId,
-        recipe_thumb: "image_url",
-        recipe_name: undefined,
+        authorUuid: authorId,
+        recipeThumb: "image_url",
+        recipeName: undefined,
         type: "recipe",
         category: "sweets",
         cuisine: "French",
@@ -116,9 +116,9 @@ describe("Recipe Service", () => {
       const authorId = "12345";
 
       const recipeData = {
-        author_id: authorId,
-        recipe_thumb: "image_url",
-        recipe_name: "New Recipe",
+        authorUuid: authorId,
+        recipeThumb: "image_url",
+        recipeName: "New Recipe",
         type: "recipe",
         category: "sweets",
         cuisine: "French",
@@ -144,10 +144,10 @@ describe("Recipe Service", () => {
     it("should update an existing recipe and return the updated recipe", async () => {
       const recipeData = {
         uuid: "12345",
-        author_id: authorId,
-        creation_date: 1234567,
-        recipe_thumb: "image_url",
-        recipe_name: "Updated Dessert Name",
+        authorUuid: authorId,
+        creationDate: 1234567,
+        recipeThumb: "image_url",
+        recipeName: "Updated Dessert Name",
         type: "recipe",
         category: "sweets",
         cuisine: "Italian",
@@ -174,11 +174,11 @@ describe("Recipe Service", () => {
 
     it("should log and throw an error if updateRecipe fails", async () => {
       const recipeData = {
-        author_id: authorId,
+        authorUuid: authorId,
         uuid: "12345",
-        creation_date: 1234567,
-        recipe_thumb: "image_url",
-        recipe_name: "Updated Dessert Name",
+        creationDate: 1234567,
+        recipeThumb: "image_url",
+        recipeName: "Updated Dessert Name",
         type: "recipe",
         category: "sweets",
         cuisine: "Italian",
