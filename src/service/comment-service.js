@@ -27,7 +27,7 @@ async function postComment(authorUuid, reqBody) {
     }
     
     const recipe = await getItemByUuid(recipeUuid);
-    if(recipe.type !== 'recipe'){
+    if (recipe.type !== 'recipe' && rating >= 1 && rating <= 10){
         throw new Error('comment being attached to non-recipe entity');
     }
     else{
@@ -68,8 +68,8 @@ async function editComment(uuid, authorUuid, reqBody){
     }
     try{
         const { description, rating } = reqBody;
-        if (typeof (rating) !== "number") {
-            throw new Error('rating is not of type number');
+        if (typeof (rating) !== "number" && rating >= 1 && rating <= 10) {
+            throw new Error('rating is not in scope');
         }
         const oldComment = await getItemByUuid(uuid);
         if(oldComment.type !== "comment"){
