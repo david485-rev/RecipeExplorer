@@ -143,14 +143,14 @@ async function deleteUser(uuid) {
     const command = new UpdateCommand({
         TableName,
         Key: { "uuid": uuid },
-        UpdateExpression: "set username = :u remove password, email, description, picture",
-        // ExpressionAttributeNames: {
-        //     "#username": "username",
-        //     "#password": "password",
-        //     "#email": "email",
-        //     "#description": "description",
-        //     "#picture": "picture"
-        // },
+        UpdateExpression: "set #username = :u remove #password, #email, #description, #picture",
+        ExpressionAttributeNames: {
+            "#username": "username",
+            "#password": "password",
+            "#email": "email",
+            "#description": "description",
+            "#picture": "picture"
+        },
         ExpressionAttributeValues: {
             ":u": `deleted-user${uuid}`
         },
