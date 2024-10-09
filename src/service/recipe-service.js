@@ -56,7 +56,7 @@ async function editRecipe(recipeData, authorId) {
     return response;
   } catch (err) {
     logger.error(err);
-    throw new Error(err.message);
+    throw new Error(err);
   }
 }
 
