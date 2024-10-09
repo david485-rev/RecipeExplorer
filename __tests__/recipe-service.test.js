@@ -12,11 +12,16 @@ const {
   updateRecipe,
   deleteRecipe
 } = require("../src/repository/recipe-dao");
+const {
+  scanCommentsByRecipeUuid, 
+  deleteComment
+} = require("../src/repository/comment-dao.js")
 const Recipe = require("../src/model/recipe");
 
 jest.mock("../src/repository/recipe-dao");
 jest.mock("../src/util/logger");
 jest.mock("uuid");
+jest.mock("../src/repository/comment-dao.js");
 
 describe("Recipe Service", () => {
   beforeEach(() => {
@@ -207,7 +212,9 @@ describe("Recipe Service", () => {
         $metadata: { httpStatusCode: 200 },
         data: "Deleted recipe data"
       };
+      const commentList = [];
 
+      scanCommentsByRecipeUuid.mockReturnValue(commentList);
       deleteRecipe.mockResolvedValue(mockResponse);
 
       const result = await removeRecipe(recipeId, authorId);
@@ -217,6 +224,8 @@ describe("Recipe Service", () => {
         data: mockResponse
       });
       expect(deleteRecipe).toHaveBeenCalledWith(recipeId, authorId);
+      expect(scanCommentsByRecipeUuid).toHaveBeenCalledWith(recipeId);
+      expect(deleteComment).not.toHaveBeenCalled();
     });
 
     it("should throw an error if recipeId is missing", async () => {
@@ -224,6 +233,8 @@ describe("Recipe Service", () => {
         "Missing uuid"
       );
       expect(deleteRecipe).not.toHaveBeenCalled();
+      expect(scanCommentsByRecipeUuid).not.toHaveBeenCalled();
+      expect(deleteComment).not.toHaveBeenCalled();
     });
 
     it("should log and throw an error if deleteRecipe fails", async () => {
@@ -234,6 +245,27 @@ describe("Recipe Service", () => {
         mockError.message
       );
       expect(logger.error).toHaveBeenCalledWith(mockError);
+    });
+    it("should delete all comments connected to an existing recipe", async () => {
+      const mockResponse = {
+        $metadata: { httpStatusCode: 200 },
+        data: "Deleted recipe data"
+      };
+      const commentList = [{uuid: "1"}, {uuid: "2"}];
+
+      scanCommentsByRecipeUuid.mockReturnValue(commentList);
+      deleteComment.mockReturnValue(null);
+      deleteRecipe.mockResolvedValue(mockResponse);
+
+      const result = await removeRecipe(recipeId, authorId);
+
+      expect(result).toEqual({
+        statusCode: 200,
+        data: mockResponse
+      });
+      expect(deleteRecipe).toHaveBeenCalledWith(recipeId, authorId);
+      expect(scanCommentsByRecipeUuid).toHaveBeenCalledWith(recipeId);
+      expect(deleteComment).toHaveBeenCalledTimes(2);
     });
   });
 });

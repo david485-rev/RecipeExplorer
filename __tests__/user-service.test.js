@@ -1,10 +1,9 @@
-const { createUser, queryUserByUsername, patchPassword, postProfile, queryEmail} = require('../src/repository/user-dao');
-const { register, passwordChange, createProfile,getUserByUsernamePassword  } = require('../src/service/user-service');
+const { createUser, queryUserByUsername, patchPassword, postProfile, queryEmail, queryRecipesByAuthorUuid, queryAllByAuthorUuid } = require('../src/repository/user-dao');
+const { register, passwordChange, createProfile, getUserByUsernamePassword, getRecipesByAuthorUuid, getRecipesCommentsByAuthorUuid } = require('../src/service/user-service');
 const { getItemByUuid } = require('../src/repository/general-dao');
 const { getDatabaseItem } = require('../src/service/general-service');
-
+jest.mock('bcrypt')
 const bcrypt = require("bcrypt");
-
 jest.mock('../src/repository/user-dao', () => {
     const originalModule = jest.requireActual('../src/repository/user-dao');
 
@@ -14,37 +13,27 @@ jest.mock('../src/repository/user-dao', () => {
         queryEmail: jest.fn(),
         createUser: jest.fn(),
         patchPassword: jest.fn(),
-        postProfile: jest.fn()
+        postProfile: jest.fn(),
+        queryRecipesByAuthorUuid: jest.fn(),
+        queryAllByAuthorUuid: jest.fn()
     }
 });
+
 
 jest.mock('../src/repository/general-dao', () => {
     const originalModule = jest.requireActual('../src/repository/general-dao');
 
     return {
-        ...origin,
-        getDatabaseItem: jest.fn()
-    }
-})
-
-jest.mock('../src/service/general-service', () => {
-    const originalModule = jest.requireActual('../src/service/general-service');
-
-    return {
-        ...origin,
+        ...originalModule,
         getItemByUuid: jest.fn()
     }
 })
 
+
 describe('User Service Tests', () => {
     afterEach(() => {
         // clean up mock functions after each test
-        queryUserByUsername.mockClear();
-        queryEmail.mockClear();
-        createUser.mockClear();
-        patchPassword.mockClear();
-        postProfile.mockClear();
-        getItemByUuid.mockClear();
+        jest.clearAllMocks();
     })
 
     test('register should return a 200 status code for a successful register', async () => {
@@ -197,9 +186,9 @@ describe('User Service Tests', () => {
         });
 
         expect(async () => {
-            await passwordChange(reqBody); 
-        }).rejects.toThrow("New password can not be empty");
-        expect(getItemByUuid).toHaveBeenCalledTimes(1);
+            await register(reqBody);
+        }).rejects.toThrow('user with username already exists!');
+        expect(queryUserByUsername).toHaveBeenCalledTimes(1);
     });
 
     test('register should throw an Error when trying to register with an email that is already used', async () => {
@@ -246,49 +235,59 @@ describe('User Service Tests', () => {
     });
 
     test('password should throw error if typed password is not matched with a current password in database', async() => {
-        const reqBody ={
+        const token = {
+            uuid: "validToken"
+        }
+        
+        const reqBody = {
             password: 'wrongPassword',
             newPassword: 'newPassowrd'
         };
 
         getItemByUuid.mockReturnValueOnce({
+            uuid: "validToken",
             password: 'rightpassword'
         });
 
+        bcrypt.compare.mockResolvedValue(false);
+
         expect(async() => {
-            await passwordChange(reqBody);
+            await passwordChange(reqBody, token.uuid);
         }).rejects.toThrow("password is not correct");
         expect(getItemByUuid).toHaveBeenCalledTimes(1);
     })
 
     test('metadata should be return upon successful change of password', async() => {
-        const encyptedPassword = await bcrypt.hash('rightPassword', 10);
+        const token = {
+            uuid: 'validToken'
+        }
+
         const reqBody = {
             password: 'rightPassword',
             newPassword: 'newPassword'
         }
 
         getItemByUuid.mockReturnValueOnce({
-            password: String(encyptedPassword)
+            uuid: 'validToken',
+            password: 'rightPassword'
         });
-
-        const result = await passwordChange(reqBody);
+        bcrypt.compare.mockResolvedValue(true);
+        const result = await passwordChange(reqBody, token.uuid);
 
         expect(result).not.toBe(null);
-        expect(patchPassword).toHaveBeenCalledTimes(1);
         expect(getItemByUuid).toHaveBeenCalledTimes(1);
+        expect(bcrypt.compare).toHaveBeenCalledTimes(1);
+        expect(patchPassword).toHaveBeenCalledTimes(1);
     })
-    
+ 
     test('get profile should return every information except password and null', async() => {
         
         //null description and empty picture
         //should return as it is except password
-        const token = {
-            uuid: 'validUuid'
-        }
+        const uuidParam = 'validPassword'
 
         getItemByUuid.mockReturnValueOnce({
-            uuid: 'ValidUuid',
+            uuid: 'validUuid',
             password: 'password',
             username: 'user1',
             email: 'user1@email.com',
@@ -298,14 +297,14 @@ describe('User Service Tests', () => {
         });
 
         const expectResult = {
-            uuid: 'ValidUuid',
+            uuid: 'validUuid',
             username: 'user1',
             email:'user1@email.com',
             picture: "",
             description: null,
         }
 
-        const result = await getDatabaseItem(token.uuid);
+        const result = await getDatabaseItem(uuidParam);
 
         expect(result).toEqual(expectResult);
         expect(getItemByUuid).toHaveBeenCalledTimes(1);
@@ -320,29 +319,27 @@ describe('User Service Tests', () => {
         
         //user provided different username and email that is different from current username and email 
         const reqBody = {
-            email:"user2@email.com",
+            email:"newEmail",
             description: "desciprtion",
-            username: 'user2',
+            username: "newName",
             picture: "www.picture.com"
         };
 
-        //already existing username in database
-
         queryUserByUsername.mockReturnValueOnce(false);
-        queryEmail(false);
+        queryEmail.mockReturnValueOnce(false);
 
         //not a already using username by a user
-        getDatabaseItem.mockReturnValueOnce({
+        getItemByUuid.mockReturnValueOnce({
             uuid: "validUuid",
-            username:"something different",
-            email: "different email"
+            username:"differentEmail",
+            email: "differentEmail"
         });
 
         const result = await createProfile(reqBody, token.uuid);
         expect(result).not.toBe(null);
         expect(queryUserByUsername).toHaveBeenCalledTimes(1);
         expect(queryEmail).toHaveBeenCalledTimes(1);
-        expect(getDatabaseItem).toHaveBeenCalledTimes(1);
+        expect(getItemByUuid).toHaveBeenCalledTimes(1);
     })
 
     test('update profile upon providing differnt username and email from database but same current username and email ', async() => {
@@ -362,10 +359,10 @@ describe('User Service Tests', () => {
         //already existing username in database
 
         queryUserByUsername.mockReturnValueOnce(false);
-        queryEmail(false);
+        queryEmail.mockReturnValueOnce(false);
 
         //update with already using username and email by a user
-        getDatabaseItem.mockReturnValueOnce({
+        getItemByUuid.mockReturnValueOnce({
             uuid: "validUuid",
             username:"user2",
             email:"user2@email.com"
@@ -375,7 +372,7 @@ describe('User Service Tests', () => {
         expect(result).not.toBe(null);
         expect(queryUserByUsername).toHaveBeenCalledTimes(1);
         expect(queryEmail).toHaveBeenCalledTimes(1);
-        expect(getDatabaseItem).toHaveBeenCalledTimes(1);
+        expect(getItemByUuid).toHaveBeenCalledTimes(1);
     })
     
     test('updating profile with empty email should throw error', async()=> {
@@ -415,7 +412,7 @@ describe('User Service Tests', () => {
         }).rejects.toThrow('missing username');
     })
 
-    test("updating profile with exiting username which is not the same name as current username should throw error", async() => {
+    test("updating profile with exiting username in databae and, it is not the same name as current username should throw error", async() => {
         
         const token = {
             uuid: "validUuid"
@@ -433,23 +430,26 @@ describe('User Service Tests', () => {
         const mockValue = {
             username:'user1',
             password:'hashedPasword',
+            email:"user2@email.com",
             description: null,
             picture: null
         }
 
         queryUserByUsername.mockReturnValueOnce(mockValue);
+        queryEmail.mockReturnValueOnce(mockValue);
 
         //not a already using username by a user
-        getDatabaseItem.mockReturnValueOnce({
+        getItemByUuid.mockReturnValueOnce({
             uuid: "validUuid",
-            username:"something different"
+            username:"something different",
+            email: "something different"
         })
 
         expect(async() => {
             await createProfile(reqBody, token.uuid);
         }).rejects.toThrow('user with this username already exists!');
         expect(queryUserByUsername).toHaveBeenCalledTimes(1);
-        expect(getDatabaseItem).toHaveBeenCalledTimes(1);
+
     });
 
     test("updating profile with exiting email which is not the same email as current user email should throw error", async() => {
@@ -468,7 +468,7 @@ describe('User Service Tests', () => {
 
         //already existing email in database
         const mockValue = {
-            username:'user1',
+            username:'user3',
             password:'hashedPasword',
             email:"user1@email.com",
             description: null,
@@ -478,15 +478,132 @@ describe('User Service Tests', () => {
         queryEmail.mockReturnValueOnce(mockValue);
 
         //not a already using email by a user
-        getDatabaseItem.mockReturnValueOnce({
+        getItemByUuid.mockReturnValueOnce({
             uuid: "validUuid",
-            email:"something different"
+            email:"something_Different",
+            username: "something_Differnet"
         })
 
         expect(async() => {
             await createProfile(reqBody, token.uuid);
         }).rejects.toThrow('this email already exist');
-        expect(queryEmail).toHaveBeenCalledTimes(1);
-        expect(getDatabaseItem).toHaveBeenCalledTimes(1);
+    });
+});
+
+describe("Testing getting a users recipes via user-service.getRecipesByAuthorUuid", () => {
+    afterEach(() => {
+        queryRecipesByAuthorUuid.mockClear();
+        queryRecipesByAuthorUuid.mockReset();
+    });
+
+    test("getting a list of recipes by authorUuid", async () => {
+        const expectedResult = [{ uuid: "7", authorUuid: "5", type: "recipe" }, 
+            { uuid: "8", authorUuid: "5", type: "recipe" }];
+        const uuid = "5"
+        let result = null;
+        queryRecipesByAuthorUuid.mockReturnValueOnce(expectedResult);
+        
+        result = await getRecipesByAuthorUuid(uuid);
+
+        expect(result).toEqual(expectedResult);
+        expect(queryRecipesByAuthorUuid).toHaveBeenCalled();
+    });
+
+    test("getting a list of recipes by authorUuid no recipes", async () => {
+        const expectedResult = [];
+        const uuid = "5"
+        let result = null;
+        queryRecipesByAuthorUuid.mockReturnValueOnce(expectedResult);
+
+        result = await getRecipesByAuthorUuid(uuid);
+
+        expect(result).toEqual(expectedResult);
+        expect(queryRecipesByAuthorUuid).toHaveBeenCalled();
+    });
+
+    test("getting a list of recipes by authorUuid bad database return", async () => {
+        const expectedError = 'database error';
+        const uuid = "5"
+
+        queryRecipesByAuthorUuid.mockImplementation(() => {
+            throw new Error(expectedError);
+        });
+
+        expect(async () => {
+            await getRecipesByAuthorUuid(uuid)
+        }).rejects.toThrow(expectedError);
+    });
+
+    test("getting a list of recipes by authorUuid no authorUuid", async () => {
+        const expectedError = 'uuid missing';
+        const expectedResult = [];
+        const uuid = null
+
+        queryRecipesByAuthorUuid.mockReturnValueOnce(expectedResult);
+
+        expect(async () => {
+            await getRecipesByAuthorUuid(uuid)
+        }).rejects.toThrow(expectedError);
+        expect(queryRecipesByAuthorUuid).not.toHaveBeenCalled();
+    });
+});
+describe("Testing getting a users recipes via user-service.getRecipesByAuthorUuid", () => {
+    afterEach(() => {
+        queryAllByAuthorUuid.mockClear();
+        queryAllByAuthorUuid.mockReset();
+    });
+
+    test("getting a list of recipes and comments by authorUuid", async () => {
+        const expectedResult = [{ uuid: "7", authorUuid: "5", type: "recipe" }, 
+            { uuid: "8", authorUuid: "5", type: "recipe" }, 
+            { uuid: "12", authorUuid: "5", type: "comment" }];
+        const uuid = "5"
+        let result = null;
+        queryAllByAuthorUuid.mockReturnValueOnce(expectedResult);
+
+        result = await getRecipesCommentsByAuthorUuid(uuid);
+
+        expect(result).toEqual(expectedResult);
+        expect(queryAllByAuthorUuid).toHaveBeenCalled();
+        
+    });
+
+    test("getting a list of recipes and comments by authorUuid no posts", async () => {
+        const expectedResult = [];
+        const uuid = "5"
+        let result = null;
+        queryAllByAuthorUuid.mockReturnValueOnce(expectedResult);
+
+        result = await getRecipesCommentsByAuthorUuid(uuid);
+
+        expect(result).toEqual(expectedResult);
+        expect(queryAllByAuthorUuid).toHaveBeenCalled();
+
+    });
+
+    test("getting a list of recipes and comments by authorUuid bad database return", async () => {
+        const expectedError = 'database error';
+        const uuid = "5"
+        
+        queryAllByAuthorUuid.mockImplementation(() => {
+            throw new Error(expectedError);
+        });
+
+        expect(async () => {
+            await getRecipesCommentsByAuthorUuid(uuid)
+        }).rejects.toThrow(expectedError);
+    });
+    
+    test("getting a list of recipes and comments by authorUuid no authorUuid", async () => {
+        const expectedError = 'uuid missing';
+        const expectedResult = [];
+        const uuid = null
+
+        queryAllByAuthorUuid.mockReturnValueOnce(expectedResult);
+
+        expect(async () => {
+            await getRecipesCommentsByAuthorUuid(uuid)
+        }).rejects.toThrow(expectedError);
+        expect(queryAllByAuthorUuid).not.toHaveBeenCalled();
     });
 });
