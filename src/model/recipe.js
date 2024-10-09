@@ -3,13 +3,13 @@ const uuid = require("uuid");
 class Recipe {
   constructor(recipeData, authorId) {
     this.uuid = uuid.v4();
-    this.creation_date = Math.floor(new Date().getTime() / 1000);
-    this.author_id = authorId;
-    this.recipe_thumb = recipeData.recipe_thumb;
-    this.recipe_name = recipeData.recipe_name;
+    this.creationDate = Math.floor(new Date().getTime() / 1000);
+    this.authorUuid = authorId;
+    this.recipeThumb = recipeData.recipeThumb;
+    this.recipeName = recipeData.recipeName;
     this.type = "recipe";
-    this.category = recipeData.category;
-    this.cuisine = recipeData.cuisine;
+    this.category = recipeData.category.toLowerCase();
+    this.cuisine = recipeData.cuisine.toLowerCase();
     this.description = recipeData.description;
     this.ingredients = recipeData.ingredients;
     this.instructions = recipeData.instructions;

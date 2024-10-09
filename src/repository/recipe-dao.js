@@ -15,8 +15,8 @@ const docClient = DynamoDBDocumentClient.from(client);
 
 const TableName = "RecipeExplorer";
 
-async function queryRecipes() {
-  const command = new QueryCommand({
+async function queryRecipes(queryKey = null, queryVal = null) {
+  const commandQuery = {
     TableName,
     IndexName: "type-index",
     KeyConditionExpression: "#type = :type",
@@ -26,7 +26,19 @@ async function queryRecipes() {
     ExpressionAttributeValues: {
       ":type": "recipe"
     }
-  });
+  };
+
+  if (queryKey && queryVal) {
+    commandQuery.FilterExpression =
+      queryKey === "ingredients"
+        ? "contains(#queryKey, :queryVal)"
+        : "#queryKey = :queryVal";
+    commandQuery.ExpressionAttributeNames["#queryKey"] = queryKey;
+    commandQuery.ExpressionAttributeValues[":queryVal"] = queryVal;
+  }
+
+  const command = new QueryCommand(commandQuery);
+
   try {
     const response = await docClient.send(command);
     logger.info("Queried recipes");
@@ -57,10 +69,10 @@ async function updateRecipe(Recipe) {
     TableName,
     Key: { uuid: Recipe.uuid },
     UpdateExpression:
-      "Set #recipe_thumb = :recipe_thumb, #recipe_name = :recipe_name, #category = :category, #cuisine = :cuisine, #description = :description, #ingredients = :ingredients, #instructions = :instructions",
+      "Set #recipe_thumb = :recipe_thumb, #recipeName = :recipeName, #category = :category, #cuisine = :cuisine, #description = :description, #ingredients = :ingredients, #instructions = :instructions",
     ExpressionAttributeNames: {
       "#recipe_thumb": "recipe_thumb",
-      "#recipe_name": "recipe_name",
+      "#recipeName": "recipeName",
       "#category": "category",
       "#cuisine": "cuisine",
       "#description": "description",
@@ -69,7 +81,7 @@ async function updateRecipe(Recipe) {
     },
     ExpressionAttributeValues: {
       ":recipe_thumb": Recipe.recipe_thumb,
-      ":recipe_name": Recipe.recipe_name,
+      ":recipeName": Recipe.recipeName,
       ":category": Recipe.category,
       ":cuisine": Recipe.cuisine,
       ":description": Recipe.description,
@@ -92,8 +104,8 @@ async function deleteRecipe(recipeId, authorId) {
   const command = new DeleteCommand({
     TableName,
     Key: { uuid: recipeId },
-    ConditionExpression: "#author_id = :authorId",
-    ExpressionAttributeNames: { "#author_id": "author_id" },
+    ConditionExpression: "#authorUuid = :authorId",
+    ExpressionAttributeNames: { "#authorUuid": "authorUuid" },
     ExpressionAttributeValues: { ":authorId": authorId }
   });
   try {
