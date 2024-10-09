@@ -5,6 +5,7 @@ const {
   updateRecipe,
   deleteRecipe
 } = require("../repository/recipe-dao");
+const { scanCommentsByRecipeUuid, deleteComment } = require("../repository/comment-dao.js")
 const Recipe = require("../model/recipe");
 
 const response = { statusCode: null, data: null };
@@ -63,6 +64,11 @@ async function editRecipe(recipeData, authorId) {
 async function removeRecipe(recipeId, authorId) {
   try {
     validateId(recipeId, "uuid");
+
+    const commentList = await scanCommentsByRecipeUuid(recipeId);
+    commentList.forEach(async (comment) => {
+      await deleteComment(comment.uuid);
+    })
 
     const recipe = await deleteRecipe(recipeId, authorId);
     response.statusCode = recipe.$metadata.httpStatusCode;
