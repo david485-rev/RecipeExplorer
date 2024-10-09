@@ -59,39 +59,34 @@ async function getRecipeComments(recipeUuid) {
   }
 }
 
-async function editComment(uuid, authorUuid, reqBody) {
-  if (!uuid) {
-    throw new Error("missing uuid");
-  }
-  if (!authorUuid) {
-    throw new Error("missing authorUuid");
-  }
-  try {
-    const { description, rating } = reqBody;
-    if (!rating || !description) {
-      throw new Error("missing rating or description");
+async function editComment(uuid, authorUuid, reqBody){
+    if(!uuid){
+        throw new Error("missing uuid");
     }
-    if (typeof rating !== "number" && !(rating >= 1) && !(rating <= 10)) {
-      throw new Error("rating is not in scope");
+    if(!authorUuid){
+        throw new Error("missing authorUuid");
     }
-    const oldComment = await getItemByUuid(uuid);
-    if (oldComment.type !== "comment") {
-      throw new Error("uuid does not point to comment");
+    try{
+        const { description, rating } = reqBody;
+        if (!rating || !description) {
+            throw new Error("missing rating or description")
+        }
+        if (typeof (rating) !== "number" && !(rating >= 1) && !(rating <= 10)) {
+            throw new Error('rating is not in scope');
+        }
+        const oldComment = await getItemByUuid(uuid);
+        if(oldComment.type !== "comment"){
+            throw new Error("uuid does not point to comment");
+        }
+        if(oldComment.authorUuid !== authorUuid){
+            throw new Error("Forbidden Access");
+        }
+        const newComment = await updateComment(uuid, description, rating);
+        return newComment;
+    }catch(err){
+        logger.error(err);
+        throw new Error(err);
     }
-    if (oldComment.authorUuid !== authorUuid) {
-      throw new Error("Forbidden Access");
-    }
-    const newComment = await updateComment(
-      uuid,
-      oldComment.creation_date,
-      description,
-      rating
-    );
-    return newComment;
-  } catch (err) {
-    logger.error(err);
-    throw new Error(err);
-  }
 }
 
 async function removeComment(uuid, authorUuid) {
