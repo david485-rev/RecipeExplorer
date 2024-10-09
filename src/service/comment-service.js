@@ -22,6 +22,9 @@ async function postComment(authorUuid, reqBody) {
     if (!rating) {
         throw new Error('missing rating');
     }
+    if(typeof(rating) !== "number"){
+        throw new Error('rating is not of type number');
+    }
     
     const recipe = await getItemByUuid(recipeUuid);
     if(recipe.type !== 'recipe'){
