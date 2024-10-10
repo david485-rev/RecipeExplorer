@@ -1,5 +1,9 @@
 {
   "name": "RecipeExplorer",
+  "jest": {
+    "verbose": true,
+    "collectCoverage": true
+  },
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
