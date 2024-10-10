@@ -13,15 +13,17 @@ const {
   deleteRecipe
 } = require("../src/repository/recipe-dao");
 const {
-  scanCommentsByRecipeUuid, 
+  scanCommentsByRecipeUuid,
   deleteComment
-} = require("../src/repository/comment-dao.js")
+} = require("../src/repository/comment-dao.js");
+const { getDatabaseItem } = require("../src/service/general-service");
 const Recipe = require("../src/model/recipe");
 
 jest.mock("../src/repository/recipe-dao");
 jest.mock("../src/util/logger");
 jest.mock("uuid");
 jest.mock("../src/repository/comment-dao.js");
+jest.mock("../src/service/general-service");
 
 describe("Recipe Service", () => {
   beforeEach(() => {
@@ -145,22 +147,19 @@ describe("Recipe Service", () => {
 
   describe("editRecipe", () => {
     const authorId = "12345";
+    const recipeData = {
+      uuid: "12345",
+      recipeThumb: "image_url",
+      recipeName: "Updated Dessert Name",
+      type: "recipe",
+      category: "sweets",
+      cuisine: "Italian",
+      description: "Delicious updated dessert recipe.",
+      ingredients: ["sugar", "flower", "mascarpone", "butter"],
+      instructions: "Mix ingredients and bake."
+    };
 
     it("should update an existing recipe and return the updated recipe", async () => {
-      const recipeData = {
-        uuid: "12345",
-        authorUuid: authorId,
-        creationDate: 1234567,
-        recipeThumb: "image_url",
-        recipeName: "Updated Dessert Name",
-        type: "recipe",
-        category: "sweets",
-        cuisine: "Italian",
-        description: "Delicious updated dessert recipe.",
-        ingredients: ["sugar", "flower", "mascarpone", "butter"],
-        instructions: "Mix ingredients and bake."
-      };
-
       const mockUpdatedRecipe = {
         $metadata: { httpStatusCode: 200 },
         Attributes: {
@@ -168,37 +167,40 @@ describe("Recipe Service", () => {
         }
       };
 
+      getDatabaseItem.mockResolvedValueOnce({ authorUuid: authorId });
       updateRecipe.mockResolvedValue(mockUpdatedRecipe);
 
       const result = await editRecipe(recipeData, authorId);
 
+      expect(getDatabaseItem).toHaveBeenCalledWith(recipeData.uuid);
+      expect(updateRecipe).toHaveBeenCalledWith(recipeData);
       expect(result.statusCode).toBe(200);
       expect(result.data).toEqual(mockUpdatedRecipe.Attributes);
-      expect(updateRecipe).toHaveBeenCalledWith(recipeData);
+    });
+
+    it("should throw an error if the author is not the recipe owner", async () => {
+      const difAuth = "different-author-uuid";
+
+      getDatabaseItem.mockResolvedValueOnce({ authorUuid: authorId });
+
+      await expect(editRecipe(recipeData, difAuth)).rejects.toThrow(
+        "Only the recipe author is allowed to edit this recipe"
+      );
+      expect(getDatabaseItem).toHaveBeenCalledWith(recipeData.uuid);
+      expect(updateRecipe).not.toHaveBeenCalled();
     });
 
     it("should log and throw an error if updateRecipe fails", async () => {
-      const recipeData = {
-        authorUuid: authorId,
-        uuid: "12345",
-        creationDate: 1234567,
-        recipeThumb: "image_url",
-        recipeName: "Updated Dessert Name",
-        type: "recipe",
-        category: "sweets",
-        cuisine: "Italian",
-        description: "Delicious updated dessert recipe.",
-        ingredients: ["sugar", "flower", "mascarpone", "butter"],
-        instructions: "Mix ingredients and bake."
-      };
-
       const mockError = new Error("Update error");
 
+      getDatabaseItem.mockResolvedValueOnce({ authorUuid: authorId });
       updateRecipe.mockRejectedValue(mockError);
 
       await expect(editRecipe(recipeData, authorId)).rejects.toThrow(
         mockError.message
       );
+      expect(getDatabaseItem).toHaveBeenCalledWith(recipeData.uuid);
+      expect(updateRecipe).toHaveBeenCalledWith(recipeData);
       expect(logger.error).toHaveBeenCalledWith(mockError);
     });
   });
@@ -251,7 +253,7 @@ describe("Recipe Service", () => {
         $metadata: { httpStatusCode: 200 },
         data: "Deleted recipe data"
       };
-      const commentList = [{uuid: "1"}, {uuid: "2"}];
+      const commentList = [{ uuid: "1" }, { uuid: "2" }];
 
       scanCommentsByRecipeUuid.mockReturnValue(commentList);
       deleteComment.mockReturnValue(null);
