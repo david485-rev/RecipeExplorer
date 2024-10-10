@@ -45,9 +45,9 @@ describe('User Service Tests', () => {
             picture: 'this is optional'
         };
 
-        queryUserByUsername.mockReturnValueOnce(false);
-        queryEmail.mockReturnValueOnce(false);
-        createUser.mockReturnValueOnce({
+        queryUserByUsername.mockResolvedValueOnce(false);
+        queryEmail.mockResolvedValueOnce(false);
+        createUser.mockResolvedValueOnce({
             '$metadata': {
               httpStatusCode: 200,
               requestId: 'DS9E6PBM40118SNLH55DC8GE0JVV4KQNSO5AEMVJF66Q9ASUAAJG',
@@ -75,9 +75,9 @@ describe('User Service Tests', () => {
             picture: 'this is optional'
         };
 
-        queryUserByUsername.mockReturnValueOnce(false);
-        queryEmail.mockReturnValueOnce(false);
-        createUser.mockReturnValueOnce({
+        queryUserByUsername.mockResolvedValueOnce(false);
+        queryEmail.mockResolvedValueOnce(false);
+        createUser.mockResolvedValueOnce({
             '$metadata': {
               httpStatusCode: 200,
               requestId: 'DS9E6PBM40118SNLH55DC8GE0JVV4KQNSO5AEMVJF66Q9ASUAAJG',
@@ -105,9 +105,9 @@ describe('User Service Tests', () => {
             picture: null
         };
 
-        queryUserByUsername.mockReturnValueOnce(false);
-        queryEmail.mockReturnValueOnce(false);
-        createUser.mockReturnValueOnce({
+        queryUserByUsername.mockResolvedValueOnce(false);
+        queryEmail.mockResolvedValueOnce(false);
+        createUser.mockResolvedValueOnce({
             '$metadata': {
               httpStatusCode: 200,
               requestId: 'DS9E6PBM40118SNLH55DC8GE0JVV4KQNSO5AEMVJF66Q9ASUAAJG',
@@ -177,7 +177,7 @@ describe('User Service Tests', () => {
             picture: 'this is optional'
         };
 
-        queryUserByUsername.mockReturnValueOnce({
+        queryUserByUsername.mockResolvedValueOnce({
             password: 'david',
             username: 'david123',
             email: 'david@gmail.com',
@@ -200,7 +200,7 @@ describe('User Service Tests', () => {
             picture: 'this is optional'
         };
 
-        queryEmail.mockReturnValueOnce({
+        queryEmail.mockResolvedValueOnce({
             email: 'david@gmail.com',
             uuid: '04d196d1-7420-4da8-abd6-0e40aba3fd95'
         });
@@ -215,7 +215,7 @@ describe('User Service Tests', () => {
         const username = 'Dolly56';
         const password = 'vwAxtVTccddYBEf';
 
-        queryUserByUsername.mockReturnValueOnce({
+        queryUserByUsername.mockResolvedValueOnce({
             uuid: '3c7f765b-2a79-4d90-9754-188073279f0c',
             username: 'Dolly56',
             password: '$2b$10$jzI6dBKtOt45QYITHcxEpu4.wMKBvUPJq3xM9fEcGnRHHL69LE/1q',
@@ -224,7 +224,7 @@ describe('User Service Tests', () => {
             picture: 'http://placeimg.com/640/480'
         });
 
-        bcrypt.compare.mockResolvedValue(true);
+        bcrypt.compare.mockResolvedValueOnce(true);
 
         const account = await getUserByUsernamePassword(username, password);
         
@@ -233,6 +233,36 @@ describe('User Service Tests', () => {
         expect(queryUserByUsername).toHaveBeenCalledTimes(1);
         expect(bcrypt.compare).toHaveBeenCalledTimes(1);
     });
+
+    test('login should throw an error if username is missing', ()=> {
+        const username = null;
+        const password = 'realPassword';
+
+        expect(async () => {
+            await getUserByUsernamePassword(username, password)
+        }).rejects.toThrow('missing username');
+    });
+
+    test('login should throw an error if password is missing', ()=> {
+        const username = 'realUsername';
+        const password = '';
+
+        expect(async () => {
+            await getUserByUsernamePassword(username, password)
+        }).rejects.toThrow('missing password');
+    });
+
+    test('login should throw an error if a User with username does not exist in the database', () => {
+        const username = 'Dolly56';
+        const password = 'vwAxtVTccddYBEf';
+
+        queryUserByUsername.mockRejectedValueOnce(false);
+
+        expect(async () => {
+            await getUserByUsernamePassword(username, password)
+        }).rejects.toThrow();
+        expect(queryUserByUsername).toHaveBeenCalledTimes(1);
+    })
 
     test('password should throw error if typed password is not matched with a current password in database', async() => {
         const token = {
