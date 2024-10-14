@@ -106,7 +106,7 @@ async function queryCommentsByAuthorUuidRecipeUuid(authorUuid, recipeUuid) {
         const data = await documentClient.send(command);
         return data.Items;
     } catch (err) {
-        console.error(err + " in queryCommentsByAuthorUuidRecipeUuid");
+        console.error(err);
         throw new Error(err);
     }
 }

@@ -3,7 +3,8 @@ const bcrypt = require("bcrypt");
 require('dotenv').config();
 const secretKey = process.env.JWT_SECRET;
 const User = require('../model/user');
-const { getItemByUuid } = require('../repository/general-dao')
+const { getItemByUuid } = require('../repository/general-dao');
+const { getDatabaseItem } = require("../service/general-service");
 const { createUser, 
     queryUserByUsername, 
     queryEmail, 
@@ -174,10 +175,10 @@ async function getUserByToken(reqParams) {
 
     try {
         const data = await getDatabaseItem(uuid);
-        if(data.role === 'user'){
+        if(data.type === 'user'){
             return data;
         }
-        throw new Error('uuid is not points to user');
+        throw new Error('uuid does not point to user');
     } catch (err) {
         logger.error(err);
         throw new Error(err);

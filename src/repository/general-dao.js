@@ -30,7 +30,7 @@ async function getItemByUuid(uuid) {
         return data.Item;
     } catch(err) {
         logger.error(err);
-        throw new Error(err);
+        throw new Error(err.message);
     }
 }
 

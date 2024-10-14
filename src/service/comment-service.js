@@ -45,7 +45,7 @@ async function postComment(authorUuid, reqBody) {
             }
             return data;
         } catch (err) {
-            logger.error(err + " at getItemByUuid");
+            logger.error(err);
             throw new Error(err);
         }
     }

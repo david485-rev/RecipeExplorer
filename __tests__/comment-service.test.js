@@ -1,5 +1,5 @@
 const commentService = require("../src/service/comment-service.js");
-const { createComment, scanCommentsByRecipeUuid, updateComment, deleteComment } = require("../src/repository/comment-dao.js");
+const { createComment, scanCommentsByRecipeUuid, updateComment, deleteComment, queryCommentsByAuthorUuidRecipeUuid } = require("../src/repository/comment-dao.js");
 const { getItemByUuid } = require("../src/repository/general-dao.js");
 
 jest.mock('../src/repository/comment-dao.js', () => {
@@ -8,6 +8,7 @@ jest.mock('../src/repository/comment-dao.js', () => {
     return {
         ...originalModule,
         scanCommentsByRecipeUuid: jest.fn(),
+        queryCommentsByAuthorUuidRecipeUuid: jest.fn(),
         createComment: jest.fn(),
         updateComment: jest.fn(),
         deleteComment: jest.fn()
@@ -24,10 +25,13 @@ jest.mock("../src/repository/general-dao.js", () => {
 
 describe("Testing comment creation via commentService.postComment", () => {
     afterEach(() => {
+        queryCommentsByAuthorUuidRecipeUuid.mockClear();
         createComment.mockClear();
         getItemByUuid.mockClear();
+        queryCommentsByAuthorUuidRecipeUuid.mockReset();
         createComment.mockReset();
         getItemByUuid.mockReset();
+
     });
     
     test("Creating a valid comment", async () => {
@@ -44,23 +48,26 @@ describe("Testing comment creation via commentService.postComment", () => {
                 totalRetryDelay: 1
             }
         };
+        const commentList = [];
         let result = null;
 
         createComment.mockReturnValueOnce(expectedResult);
         getItemByUuid.mockReturnValueOnce(recipe);
+        queryCommentsByAuthorUuidRecipeUuid.mockReturnValueOnce(commentList);
 
         result = await commentService.postComment(authorUuid, comment);
 
         expect(result).toEqual(expectedResult);
         expect(getItemByUuid).toHaveBeenCalled();
         expect(createComment).toHaveBeenCalled();
+        expect(queryCommentsByAuthorUuidRecipeUuid).toHaveBeenCalled();
     });
 
     test("Creating an invalid comment no description", async () => {
         const comment = { rating: 4, description: "", recipeUuid: "3" };
         const recipe = { uuid: "3", type: "recipe" };
         const authorUuid = "2";
-
+        
         const expectedError = "missing description";
 
         expect(async () => {
@@ -112,9 +119,28 @@ describe("Testing comment creation via commentService.postComment", () => {
                 totalRetryDelay: 1
             }
         };
+        const commentList = [];
 
         createComment.mockReturnValueOnce(databaseResult);
+        queryCommentsByAuthorUuidRecipeUuid.mockReturnValueOnce(commentList);
         getItemByUuid.mockReturnValueOnce(recipe);
+
+        expect(async () => {
+            await commentService.postComment(authorUuid, comment);
+        }).rejects.toThrow(expectedError);
+        expect(getItemByUuid).toHaveBeenCalled();
+    });
+
+    test("Creating a valid comment when a comment by the user already exists", async () => {
+        const comment = { rating: 4, description: "fake desc", recipeUuid: "3" };
+        const recipe = { uuid: "3", type: "recipe" };
+        const authorUuid = "2";
+        const expectedError = "user has already reviewed recipe 3";
+        const commentList = [{ rating: 1, description: "trash", recipeUuid: "3" }];
+        let result = null;
+
+        getItemByUuid.mockReturnValueOnce(recipe);
+        queryCommentsByAuthorUuidRecipeUuid.mockReturnValueOnce(commentList);
 
         expect(async () => {
             await commentService.postComment(authorUuid, comment);
