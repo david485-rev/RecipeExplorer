@@ -1,7 +1,5 @@
 const { logger } = require('../util/logger');
 const bcrypt = require("bcrypt");
-const { v4: uuidv4 } = require('uuid');
-const jwt = require("jsonwebtoken");
 require('dotenv').config();
 const secretKey = process.env.JWT_SECRET;
 const User = require('../model/user');
@@ -176,7 +174,10 @@ async function getUserByToken(reqParams) {
 
     try {
         const data = await getDatabaseItem(uuid);
-        return data;
+        if(data.role === 'user'){
+            return data;
+        }
+        throw new Error('uuid is not points to user');
     } catch (err) {
         logger.error(err);
         throw new Error(err);

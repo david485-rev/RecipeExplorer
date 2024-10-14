@@ -24,7 +24,7 @@ async function postComment(authorUuid, reqBody) {
     if (!rating) {
         throw new Error("missing rating");
     }
-    if (typeof rating !== "number" && !(rating >= 1) && !(rating <= 10)) {
+    if (typeof rating !== "number" && !(rating >= 1) && !(rating < 10)) {
         throw new Error("rating is not of type number");
     }
     
@@ -36,7 +36,7 @@ async function postComment(authorUuid, reqBody) {
         if(commentList.length > 0){
             throw new Error(`user has already reviewed recipe ${recipeUuid}`);
         }
-        const newComment = new Comment(authorUuid, recipeUuid, description, rating);
+        const newComment = new Comment(authorUuid, Math.floor(recipeUuid), description, rating);
 
         try {
             const data = await createComment(newComment);
@@ -76,7 +76,7 @@ async function editComment(uuid, authorUuid, reqBody) {
         if (!rating || !description) {
             throw new Error("missing rating or description")
         }
-        if (typeof (rating) !== "number" && !(rating >= 1) && !(rating <= 10)) {
+        if (typeof (rating) !== "number" && !(rating >= 1) && !(rating < 11)) {
             throw new Error('rating is not in scope');
         }
         const oldComment = await getItemByUuid(uuid);
@@ -86,7 +86,7 @@ async function editComment(uuid, authorUuid, reqBody) {
         if (oldComment.authorUuid !== authorUuid) {
             throw new Error("Forbidden Access");
         }
-        const newComment = await updateComment(uuid, description, rating);
+        const newComment = await updateComment(uuid, description, Math.floor(rating));
         return newComment;
     } catch (err) {
         logger.error(err);
