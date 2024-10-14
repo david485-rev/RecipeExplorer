@@ -121,4 +121,14 @@ router.get("/activity/:uuid", async (req, res) => {
     }
 });
 
+router.get("/user-by-token", authenticateToken, async (req, res) => {
+    try{
+        const data = await getUserByToken(req.params);
+        res.status(200).json(data);
+    }catch(err){
+        logger.error(err.message);
+        res.status(403).json({ message: err.message });
+        return;
+    }
+})
 module.exports = router;

@@ -167,6 +167,22 @@ async function getRecipesCommentsByAuthorUuid(uuid) {
     }
 }
 
+async function getUserByToken(reqParams) {
+    const { uuid } = reqParams;
+
+    if (!uuid) {
+        throw new Error('uuid missing');
+    }
+
+    try {
+        const data = await getDatabaseItem(uuid);
+        return data;
+    } catch (err) {
+        logger.error(err);
+        throw new Error(err);
+    }
+}
+
 module.exports = {
     register,
     getUserByUsernamePassword,
@@ -174,5 +190,6 @@ module.exports = {
     passwordChange,
     removeUser,
     getRecipesCommentsByAuthorUuid,
-    getRecipesByAuthorUuid
+    getRecipesByAuthorUuid,
+    getUserByToken
 }

@@ -5,7 +5,8 @@ const {
     createComment,
     scanCommentsByRecipeUuid,
     updateComment,
-    deleteComment
+    deleteComment,
+    queryCommentsByAuthorUuidRecipeUuid
 } = require("../repository/comment-dao.js");
 const { getItemByUuid } = require("../repository/general-dao.js");
 
@@ -26,11 +27,15 @@ async function postComment(authorUuid, reqBody) {
     if (typeof rating !== "number" && !(rating >= 1) && !(rating <= 10)) {
         throw new Error("rating is not of type number");
     }
-
+    
     const recipe = await getItemByUuid(recipeUuid);
     if (recipe.type !== "recipe") {
         throw new Error("comment being attached to non-recipe entity");
     } else {
+        const commentList = await queryCommentsByAuthorUuidRecipeUuid(authorUuid, recipeUuid);
+        if(commentList.length > 0){
+            throw new Error(`user has already reviewed recipe ${recipeUuid}`);
+        }
         const newComment = new Comment(authorUuid, recipeUuid, description, rating);
 
         try {
