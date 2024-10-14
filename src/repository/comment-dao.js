@@ -88,10 +88,9 @@ async function deleteComment(uuid){
 }
 
 async function queryCommentsByAuthorUuidRecipeUuid(authorUuid, recipeUuid){
-    const command = new QueryCommand({
+    const command = new ScanCommand({
         TableName,
-        IndexName: "authorUuid-recipeUuid-index",
-        KeyConditionExpression: "#authorUuid = :authorUuid AND #recipeUuid = :recipeUuid",
+        FilterExpression: "#authorUuid = :authorUuid AND #recipeUuid = :recipeUuid",
         ExpressionAttributeNames: {
             "#authorUuid": "authorUuid",
             "#recipeUuid": "recipeUuid"
