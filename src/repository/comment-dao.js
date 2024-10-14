@@ -87,7 +87,7 @@ async function deleteComment(uuid){
     }
 }
 
-async function queryCommentsByAuthorUuidRecipeUuid(authorUuid, recipeUuid){
+async function scanCommentsByAuthorUuidRecipeUuid(authorUuid, recipeUuid){
     const command = new ScanCommand({
         TableName,
         FilterExpression: "#authorUuid = :authorUuid AND #recipeUuid = :recipeUuid",
@@ -110,10 +110,35 @@ async function queryCommentsByAuthorUuidRecipeUuid(authorUuid, recipeUuid){
     }
 }
 
+async function queryCommentsByAuthorUuidRecipeUuid(authorUuid, recipeUuid) {
+    const command = new ScanCommand({
+        TableName,
+        IndexName: "authorUuid-recipeUuid-index",
+        KeyConditionExpression: "#authorUuid = :authorUuid AND #recipeUuid = :recipeUuid",
+        ExpressionAttributeNames: {
+            "#authorUuid": "authorUuid",
+            "#recipeUuid": "recipeUuid"
+        },
+        ExpressionAttributeValues: {
+            ":authorUuid": authorUuid,
+            ":recipeUuid": recipeUuid
+        }
+    })
+    try {
+        const data = await documentClient.send(command);
+        //logger.info(`Deleted recipe: ${data}`);
+        return data.Items;
+    } catch (err) {
+        console.error(err);
+        throw new Error(err);
+    }
+}
+
 module.exports = {
     createComment,
     scanCommentsByRecipeUuid,
     updateComment,
     deleteComment,
-    queryCommentsByAuthorUuidRecipeUuid
+    queryCommentsByAuthorUuidRecipeUuid,
+    scanCommentsByAuthorUuidRecipeUuid
 }

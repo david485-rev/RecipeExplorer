@@ -36,8 +36,8 @@ async function postComment(authorUuid, reqBody) {
         if(commentList.length > 0){
             throw new Error(`user has already reviewed recipe ${recipeUuid}`);
         }
-        const newComment = new Comment(authorUuid, Math.floor(recipeUuid), description, rating);
-
+        const newComment = new Comment(authorUuid, recipeUuid, description, Math.floor(rating));
+        
         try {
             const data = await createComment(newComment);
             if (data.$metadata.httpStatusCode !== 200) {
@@ -45,7 +45,7 @@ async function postComment(authorUuid, reqBody) {
             }
             return data;
         } catch (err) {
-            logger.error(err);
+            logger.error(err + " at getItemByUuid");
             throw new Error(err);
         }
     }
@@ -59,7 +59,7 @@ async function getRecipeComments(recipeUuid) {
         const commentList = await scanCommentsByRecipeUuid(recipeUuid);
         return commentList;
     } catch (err) {
-        logger.error(err);
+        logger.error(err + " at getRecipeComments");
         throw new Error(err);
     }
 }
@@ -89,7 +89,7 @@ async function editComment(uuid, authorUuid, reqBody) {
         const newComment = await updateComment(uuid, description, Math.floor(rating));
         return newComment;
     } catch (err) {
-        logger.error(err);
+        logger.error(err + " at editComment");
         throw new Error(err);
     }
 }
@@ -126,7 +126,7 @@ async function removeComment(uuid, authorUuid) {
             throw new Error("Forbidden Access");
         }
     } catch (err) {
-        logger.error(err);
+        logger.error(err + " at removeComment");
         throw new Error(err);
     }
 }
