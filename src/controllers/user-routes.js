@@ -124,7 +124,7 @@ router.get("/activity/:uuid", async (req, res) => {
 
 router.get("/user-by-token", authenticateToken, async (req, res) => {
     try{
-        const uuid = req.params.uuid;
+        const uuid = req.user.uuid;
         const data = await getUserByToken(uuid);
         res.status(200).json(data);
     }catch(err){
