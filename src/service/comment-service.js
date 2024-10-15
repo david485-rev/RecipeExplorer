@@ -24,7 +24,7 @@ async function postComment(authorUuid, reqBody) {
     if (!rating) {
         throw new Error("missing rating");
     }
-    if (typeof rating !== "number" && !(rating >= 1) && !(rating < 10)) {
+    if (typeof rating !== "number" && !(rating >= 1) && !(rating < 11)) {
         throw new Error("rating is not of type number");
     }
     
@@ -89,7 +89,7 @@ async function editComment(uuid, authorUuid, reqBody) {
         const newComment = await updateComment(uuid, description, Math.floor(rating));
         return newComment;
     } catch (err) {
-        logger.error(err + " at editComment");
+        logger.error(err);
         throw new Error(err);
     }
 }
@@ -126,7 +126,7 @@ async function removeComment(uuid, authorUuid) {
             throw new Error("Forbidden Access");
         }
     } catch (err) {
-        logger.error(err + " at removeComment");
+        logger.error(err);
         throw new Error(err);
     }
 }
