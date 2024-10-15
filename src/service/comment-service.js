@@ -24,7 +24,7 @@ async function postComment(authorUuid, reqBody) {
     if (!rating) {
         throw new Error("missing rating");
     }
-    if (typeof rating !== "number" && !(rating >= 1) && !(rating < 10)) {
+    if (typeof rating !== "number" && !(rating >= 1) && !(rating < 11)) {
         throw new Error("rating is not of type number");
     }
     
