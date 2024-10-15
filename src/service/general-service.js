@@ -4,7 +4,7 @@ const { getItemByUuid } = require("../repository/general-dao.js");
 
 async function getDatabaseItem(uuid) {
   if (!uuid) {
-    throw new Error("missing Uuid");
+    throw new Error("missing uuid");
   }
   try {
     const newItem = {};
@@ -25,7 +25,7 @@ async function getDatabaseItem(uuid) {
     return newItem;
   } catch (err) {
     logger.error(err);
-    throw new Error(err);
+    throw new Error(err.message);
   }
 }
 

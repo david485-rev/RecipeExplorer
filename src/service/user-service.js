@@ -1,11 +1,10 @@
 const { logger } = require('../util/logger');
 const bcrypt = require("bcrypt");
-const { v4: uuidv4 } = require('uuid');
-const jwt = require("jsonwebtoken");
 require('dotenv').config();
 const secretKey = process.env.JWT_SECRET;
 const User = require('../model/user');
-const { getItemByUuid } = require('../repository/general-dao')
+const { getItemByUuid } = require('../repository/general-dao');
+const { getDatabaseItem } = require("../service/general-service");
 const { createUser, 
     queryUserByUsername, 
     queryEmail, 
@@ -167,6 +166,25 @@ async function getRecipesCommentsByAuthorUuid(uuid) {
     }
 }
 
+async function getUserByToken(reqParams) {
+    const { uuid } = reqParams;
+
+    if (!uuid) {
+        throw new Error('uuid missing');
+    }
+
+    try {
+        const data = await getDatabaseItem(uuid);
+        if(data.type === 'user'){
+            return data;
+        }
+        throw new Error('uuid does not point to user');
+    } catch (err) {
+        logger.error(err);
+        throw new Error(err);
+    }
+}
+
 module.exports = {
     register,
     getUserByUsernamePassword,
@@ -174,5 +192,6 @@ module.exports = {
     passwordChange,
     removeUser,
     getRecipesCommentsByAuthorUuid,
-    getRecipesByAuthorUuid
+    getRecipesByAuthorUuid,
+    getUserByToken
 }

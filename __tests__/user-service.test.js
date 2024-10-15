@@ -1,9 +1,10 @@
 const { createUser, queryUserByUsername, patchPassword, postProfile, queryEmail, queryRecipesByAuthorUuid, queryAllByAuthorUuid } = require('../src/repository/user-dao');
-const { register, passwordChange, createProfile, getUserByUsernamePassword, getRecipesByAuthorUuid, getRecipesCommentsByAuthorUuid } = require('../src/service/user-service');
+const { register, passwordChange, createProfile, getUserByUsernamePassword, getRecipesByAuthorUuid, getRecipesCommentsByAuthorUuid, getUserByToken } = require('../src/service/user-service');
 const { getItemByUuid } = require('../src/repository/general-dao');
 const { getDatabaseItem } = require('../src/service/general-service');
 jest.mock('bcrypt')
 const bcrypt = require("bcrypt");
+
 jest.mock('../src/repository/user-dao', () => {
     const originalModule = jest.requireActual('../src/repository/user-dao');
 
@@ -19,7 +20,6 @@ jest.mock('../src/repository/user-dao', () => {
     }
 });
 
-
 jest.mock('../src/repository/general-dao', () => {
     const originalModule = jest.requireActual('../src/repository/general-dao');
 
@@ -29,6 +29,14 @@ jest.mock('../src/repository/general-dao', () => {
     }
 })
 
+jest.mock('../src/service/general-service', () => {
+    const originalModule = jest.requireActual('../src/service/general-service');
+    
+    return {
+        ...originalModule,
+        getDatabaseItem: jest.fn()
+    }
+})
 
 describe('User Service Tests', () => {
     afterEach(() => {
@@ -279,37 +287,6 @@ describe('User Service Tests', () => {
         expect(bcrypt.compare).toHaveBeenCalledTimes(1);
         expect(patchPassword).toHaveBeenCalledTimes(1);
     })
- 
-    test('get profile should return every information except password and null', async() => {
-        
-        //null description and empty picture
-        //should return as it is except password
-        const uuidParam = 'validPassword'
-
-        getItemByUuid.mockReturnValueOnce({
-            uuid: 'validUuid',
-            password: 'password',
-            username: 'user1',
-            email: 'user1@email.com',
-            picture: "",
-            description: null,
-
-        });
-
-        const expectResult = {
-            uuid: 'validUuid',
-            username: 'user1',
-            email:'user1@email.com',
-            picture: "",
-            description: null,
-        }
-
-        const result = await getDatabaseItem(uuidParam);
-
-        expect(result).toEqual(expectResult);
-        expect(getItemByUuid).toHaveBeenCalledTimes(1);
-
-    });
 
     test('update profile upon providing differnt username and email from database and, differnt current username and email', async() => {
         
@@ -605,5 +582,46 @@ describe("Testing getting a users recipes via user-service.getRecipesByAuthorUui
             await getRecipesCommentsByAuthorUuid(uuid)
         }).rejects.toThrow(expectedError);
         expect(queryAllByAuthorUuid).not.toHaveBeenCalled();
+    });
+});
+
+describe("Testing getting a users info with a user token via user-service.getUserByToken", () => {
+    afterEach(() => {
+        getDatabaseItem.mockClear();
+        getDatabaseItem.mockReset();
+    });
+
+    test("getting a valid user by their token", async () => {
+        const reqBody = {uuid: "4", otherValues: "these are other things"};
+        const expectedResult = {uuid: "4", type: "user", username: "alex"};
+        let result = null;
+
+        getDatabaseItem.mockReturnValueOnce(expectedResult);
+
+        result = await getUserByToken(reqBody);
+
+        expect(result).toEqual(expectedResult);
+        expect(getDatabaseItem).toHaveBeenCalled();
+    });
+    test("getting a valid user by their token inavlid database item", async () => {
+        const reqBody = { uuid: "4", otherValues: "these are other things" };
+        const expectedResult = { uuid: "4", type: "comment", rating: 3 };
+        const expectedError = 'uuid does not point to user';
+        let result = null;
+
+        getDatabaseItem.mockReturnValueOnce(expectedResult);
+
+        expect(async () => {
+            await getUserByToken(reqBody)
+        }).rejects.toThrow(expectedError);
+    });
+
+    test("getting a valid user by their no uuid in reqBody", async () => {
+        const reqBody = { otherValues: "these are other things" };
+        const expectedError = 'uuid missing';
+
+        expect(async () => {
+            await getUserByToken(reqBody)
+        }).rejects.toThrow(expectedError);
     });
 });

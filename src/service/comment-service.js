@@ -5,7 +5,8 @@ const {
     createComment,
     scanCommentsByRecipeUuid,
     updateComment,
-    deleteComment
+    deleteComment,
+    queryCommentsByAuthorUuidRecipeUuid
 } = require("../repository/comment-dao.js");
 const { getItemByUuid } = require("../repository/general-dao.js");
 
@@ -23,16 +24,20 @@ async function postComment(authorUuid, reqBody) {
     if (!rating) {
         throw new Error("missing rating");
     }
-    if (typeof rating !== "number" && !(rating >= 1) && !(rating <= 10)) {
+    if (typeof rating !== "number" && !(rating >= 1) && !(rating < 11)) {
         throw new Error("rating is not of type number");
     }
-
+    
     const recipe = await getItemByUuid(recipeUuid);
     if (recipe.type !== "recipe") {
         throw new Error("comment being attached to non-recipe entity");
     } else {
-        const newComment = new Comment(authorUuid, recipeUuid, description, rating);
-
+        const commentList = await queryCommentsByAuthorUuidRecipeUuid(authorUuid, recipeUuid);
+        if(commentList.length > 0){
+            throw new Error(`user has already reviewed recipe ${recipeUuid}`);
+        }
+        const newComment = new Comment(authorUuid, recipeUuid, description, Math.floor(rating));
+        
         try {
             const data = await createComment(newComment);
             if (data.$metadata.httpStatusCode !== 200) {
@@ -54,7 +59,7 @@ async function getRecipeComments(recipeUuid) {
         const commentList = await scanCommentsByRecipeUuid(recipeUuid);
         return commentList;
     } catch (err) {
-        logger.error(err);
+        logger.error(err + " at getRecipeComments");
         throw new Error(err);
     }
 }
@@ -71,7 +76,7 @@ async function editComment(uuid, authorUuid, reqBody) {
         if (!rating || !description) {
             throw new Error("missing rating or description")
         }
-        if (typeof (rating) !== "number" && !(rating >= 1) && !(rating <= 10)) {
+        if (typeof (rating) !== "number" && !(rating >= 1) && !(rating < 11)) {
             throw new Error('rating is not in scope');
         }
         const oldComment = await getItemByUuid(uuid);
@@ -81,7 +86,7 @@ async function editComment(uuid, authorUuid, reqBody) {
         if (oldComment.authorUuid !== authorUuid) {
             throw new Error("Forbidden Access");
         }
-        const newComment = await updateComment(uuid, description, rating);
+        const newComment = await updateComment(uuid, description, Math.floor(rating));
         return newComment;
     } catch (err) {
         logger.error(err);

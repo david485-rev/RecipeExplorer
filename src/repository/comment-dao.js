@@ -1,6 +1,7 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const {
     DynamoDBDocumentClient,
+    QueryCommand,
     PutCommand,
     ScanCommand,
     UpdateCommand,
@@ -87,9 +88,33 @@ async function deleteComment(uuid){
     }
 }
 
+async function queryCommentsByAuthorUuidRecipeUuid(authorUuid, recipeUuid) {
+    const command = new QueryCommand({
+        TableName,
+        IndexName: "authorUuid-recipeUuid-index",
+        KeyConditionExpression: "#authorUuid = :authorUuid AND #recipeUuid = :recipeUuid",
+        ExpressionAttributeNames: {
+            "#authorUuid": "authorUuid",
+            "#recipeUuid": "recipeUuid"
+        },
+        ExpressionAttributeValues: {
+            ":authorUuid": authorUuid,
+            ":recipeUuid": recipeUuid
+        }
+    })
+    try {
+        const data = await documentClient.send(command);
+        return data.Items;
+    } catch (err) {
+        console.error(err);
+        throw new Error(err);
+    }
+}
+
 module.exports = {
     createComment,
     scanCommentsByRecipeUuid,
     updateComment,
-    deleteComment
+    deleteComment,
+    queryCommentsByAuthorUuidRecipeUuid
 }
