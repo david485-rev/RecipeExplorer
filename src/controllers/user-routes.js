@@ -9,7 +9,8 @@ const { getUserByUsernamePassword,
     passwordChange, 
     removeUser, 
     getRecipesCommentsByAuthorUuid,
-    getRecipesByAuthorUuid
+    getRecipesByAuthorUuid,
+    getUserByToken
 } = require('../service/user-service.js');
 const { getDatabaseItem } = require('../service/general-service.js');
 require('dotenv').config();
@@ -123,7 +124,8 @@ router.get("/activity/:uuid", async (req, res) => {
 
 router.get("/user-by-token", authenticateToken, async (req, res) => {
     try{
-        const data = await getUserByToken(req.params);
+        const uuid = req.params.uuid;
+        const data = await getUserByToken(uuid);
         res.status(200).json(data);
     }catch(err){
         logger.error(err.message);

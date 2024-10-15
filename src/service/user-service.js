@@ -166,9 +166,7 @@ async function getRecipesCommentsByAuthorUuid(uuid) {
     }
 }
 
-async function getUserByToken(reqParams) {
-    const { uuid } = reqParams;
-
+async function getUserByToken(uuid) {
     if (!uuid) {
         throw new Error('uuid missing');
     }
