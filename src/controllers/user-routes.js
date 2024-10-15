@@ -126,6 +126,7 @@ router.get("/user-by-token", authenticateToken, async (req, res) => {
     try{
         const uuid = req.user.uuid;
         const data = await getUserByToken(uuid);
+
         res.status(200).json(data);
     }catch(err){
         logger.error(err.message);
