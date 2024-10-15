@@ -89,7 +89,7 @@ async function editComment(uuid, authorUuid, reqBody) {
         const newComment = await updateComment(uuid, description, Math.floor(rating));
         return newComment;
     } catch (err) {
-        logger.error(err + " at editComment");
+        logger.error(err);
         throw new Error(err);
     }
 }
@@ -126,7 +126,7 @@ async function removeComment(uuid, authorUuid) {
             throw new Error("Forbidden Access");
         }
     } catch (err) {
-        logger.error(err + " at removeComment");
+        logger.error(err);
         throw new Error(err);
     }
 }
