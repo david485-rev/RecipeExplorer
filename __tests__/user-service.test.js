@@ -622,19 +622,19 @@ describe("Testing getting a users info with a user token via user-service.getUse
     });
 
     test("getting a valid user by their token", async () => {
-        const reqBody = {uuid: "4", otherValues: "these are other things"};
+        const uuid = "4";
+
         const expectedResult = {uuid: "4", type: "user", username: "alex"};
         let result = null;
 
         getDatabaseItem.mockReturnValueOnce(expectedResult);
-
-        result = await getUserByToken(reqBody);
+        result = await getUserByToken(uuid);
 
         expect(result).toEqual(expectedResult);
         expect(getDatabaseItem).toHaveBeenCalled();
     });
     test("getting a valid user by their token inavlid database item", async () => {
-        const reqBody = { uuid: "4", otherValues: "these are other things" };
+        const uuid = "4";
         const expectedResult = { uuid: "4", type: "comment", rating: 3 };
         const expectedError = 'uuid does not point to user';
         let result = null;
@@ -642,16 +642,17 @@ describe("Testing getting a users info with a user token via user-service.getUse
         getDatabaseItem.mockReturnValueOnce(expectedResult);
 
         expect(async () => {
-            await getUserByToken(reqBody)
+
+            await getUserByToken(uuid)
         }).rejects.toThrow(expectedError);
     });
 
-    test("getting a valid user by their no uuid in reqBody", async () => {
-        const reqBody = { otherValues: "these are other things" };
+    test("getting a valid user by their no uuid", async () => {
+        const uuid = undefined;
         const expectedError = 'uuid missing';
 
         expect(async () => {
-            await getUserByToken(reqBody)
+            await getUserByToken(uuid)
         }).rejects.toThrow(expectedError);
     });
 });
