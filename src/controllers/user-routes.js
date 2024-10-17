@@ -31,7 +31,7 @@ router.post("/login", async (req, res) => {
     }
     catch (err) {
         logger.error(err);
-        res.status(400).json({ message: "no account found" });
+        res.status(400).json({ message: err.message });
         return;
     }
 
