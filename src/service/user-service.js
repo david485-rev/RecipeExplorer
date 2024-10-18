@@ -66,13 +66,18 @@ async function getUserByUsernamePassword(username, password){
     }
     try{
         const user = await queryUserByUsername(username);
+
+        if(!user) {
+            throw new Error('no account found');
+        }
+
         if (await bcrypt.compare(password, user.password)) {
             return { uuid: user.uuid, username: user.username};
         }
             
     }catch(err){
         logger.error(err);
-        throw new Error(err);
+        throw new Error(err.message);
     }
 }
 
